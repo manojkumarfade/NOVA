@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Browser Agent - Documentation</title>
+    <style>
+        :root {
+            --primary-color: #007AFF;
+            --secondary-color: #5856D6;
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --code-bg: #f5f7ff;
+            --sidebar-width: 250px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+        }
+
+        /* Sidebar for print feeling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #f8f9fa;
+            height: 100vh;
+            position: fixed;
+            padding: 20px;
+            border-right: 1px solid #eaeaea;
+            overflow-y: auto;
+        }
+
+        .sidebar h3 {
+            font-size: 0.9em;
+            text-transform: uppercase;
+            color: #888;
+            margin-top: 20px;
+            letter-spacing: 1px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar li {
+            margin-bottom: 8px;
+        }
+
+        .sidebar a {
+            text-decoration: none;
+            color: #555;
+            font-size: 0.95em;
+            display: block;
+            padding: 5px 0;
+        }
+
+        .sidebar a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Main Content */
+        .content {
+            margin-left: var(--sidebar-width);
+            padding: 40px 60px;
+            max-width: 900px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 0.2em;
+            background: -webkit-linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #666;
+            font-weight: 300;
+            margin-bottom: 40px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+
+        h2 {
+            margin-top: 50px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+            color: #222;
+        }
+
+        h3 {
+            margin-top: 30px;
+            color: #444;
+        }
+
+        /* Code Blocks like Vercel/Stripe */
+        pre {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .code-title {
+            background: #333;
+            color: #fff;
+            padding: 5px 15px;
+            font-size: 0.8em;
+            border-radius: 5px 5px 0 0;
+            display: inline-block;
+            margin-bottom: -20px;
+            /* pull down into pre */
+            position: relative;
+            top: 0;
+        }
+
+        code {
+            background-color: var(--code-bg);
+            color: var(--primary-color);
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: 'Menlo', monospace;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+        }
+
+        /* Callouts / Blockquotes */
+        blockquote {
+            background: #f0f9ff;
+            border-left: 4px solid var(--primary-color);
+            margin: 20px 0;
+            padding: 15px 20px;
+            border-radius: 0 4px 4px 0;
+            color: #2c5282;
+        }
+
+        .pro-tip {
+            background: #f0fff4;
+            border-left: 4px solid #48bb78;
+            padding: 15px;
+            margin: 20px 0;
+            color: #276749;
+            border-radius: 4px;
+        }
+
+        .warning {
+            background: #fff5f5;
+            border-left: 4px solid #f56565;
+            padding: 15px;
+            margin: 20px 0;
+            color: #c53030;
+            border-radius: 4px;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 0.95em;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+        }
+
+        table th,
+        table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table th {
+            background-color: var(--primary-color);
+            color: #ffffff;
+        }
+
+        /* Print Media Query */
+        @media print {
+            .sidebar {
+                display: none;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            body {
+                font-size: 12pt;
+            }
+
+            h1 {
+                -webkit-text-fill-color: black;
+                color: black;
+            }
+
+            pre {
+                background: #f5f5f5;
+                color: black;
+                border: 1px solid #ddd;
+                box-shadow: none;
+                white-space: pre-wrap;
+            }
+
+            a {
+                text-decoration: underline;
+                color: black;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="sidebar">
+        <div style="font-weight: bold; font-size: 1.2em; margin-bottom: 20px; color: var(--primary-color);">Nova Docs
+        </div>
+        <ul>
+            <li><a href="#intro">Introduction</a></li>
+            <li><a href="#quickstart">Quick Start</a></li>
+        </ul>
+        <h3>Internals</h3>
+        <ul>
+            <li><a href="#architecture">Architecture</a></li>
+            <li><a href="#agent-service">Agent Service (The Brain)</a></li>
+            <li><a href="#semantic-vision">Semantic Vision</a></li>
+            <li><a href="#resilience">Resilience Engine</a></li>
+        </ul>
+        <h3>Guides</h3>
+        <ul>
+            <li><a href="#shopping">Deep Research</a></li>
+            <li><a href="#image-gen">Image Generation</a></li>
+        </ul>
+        <h3>For Developers</h3>
+        <ul>
+            <li><a href="#extending">Extending Nova</a></li>
+            <li><a href="#security">Security</a></li>
+        </ul>
+    </div>
+
+    <div class="content">
+
+        <h1 id="intro">Nova Browser Agent</h1>
+        <div class="subtitle">The official documentation for the world's first true Agentic Browser Extension.</div>
+
+        <p><strong>Version:</strong> 1.0.0 | <strong>Stack:</strong> React, Chrome Extension V3, LLM</p>
+
+        <blockquote>
+            <strong>What is Nova?</strong><br>
+            Nova is an intelligent layer capable of autonomously navigating the web. It doesn't just "read" pages; it
+            clicks, types, scrolls, and analyzes content to perform complex tasks like shopping research or filling
+            forms.
+        </blockquote>
+
+        <h2 id="quickstart">🚀 Quick Start Guide</h2>
+        <p>Get up and running in less than 5 minutes.</p>
+
+        <h3>1. Installation</h3>
+        <p>Run these commands in your terminal:</p>
+        <pre><code># Clone the repo
+git clone https://github.com/your-org/rocket-extension.git
+
+# Install dependencies
+cd rocket-extension
+npm install
+
+# Build production bundle
+npm run build</code></pre>
+
+        <h3>2. Load Extension</h3>
+        <ol>
+            <li>Go to <code>chrome://extensions</code>.</li>
+            <li>Enable <strong>Developer Mode</strong> (top right).</li>
+            <li>Click <strong>Load unpacked</strong> and select the <code>dist/</code> folder.</li>
+        </ol>
+
+        <div class="pro-tip">
+            <strong>Pro Tip:</strong> Pin the extension to your toolbar for easy access. The side panel is persistent!
+        </div>
+
+        <h2 id="architecture">🏗️ Architecture & Internals</h2>
+        <p>This section explains the "Magic" for engineers and technical interviewers.</p>
+
+        <h3 id="agent-service">1. The Core Loop: <code>AgentService</code></h3>
+        <p>The <code>AgentService</code> is the central orchestrator. It uses a "Thick Client" architecture where logic
+            runs locally in the browser background.</p>
+
+        <p><strong>Simplified Logic Flow:</strong></p>
+        <pre><code>class AgentService {
+  async runTask(userGoal) {
+    // 1. Intent Detection using micro-LLM
+    const intent = await IntentDetector.analyze(userGoal);
+    
+    if (intent === 'SHOPPING') {
+        return await ShoppingService.deepResearch(userGoal);
+    }
+
+    // 2. Loop until goal is met
+    while (!taskComplete) {
+        // A. SEE: Capture DOM Snapshot
+        const state = await Observer.getBrowserState();
+        
+        // B. THINK: Ask LLM for next action
+        const action = await LLM.decide(state, userGoal);
+        
+        // C. ACT: Execute via Debugger API
+        await HybridCore.execute(action);
+        
+        // D. VERIFY: Self-Healing Check
+        if (hasError) await RecoveryEngine.fix(action);
+    }
+  }
+}</code></pre>
+
+        <h3 id="semantic-vision">2. The Vision System: <code>SemanticDOM</code></h3>
+        <p>We solve the issue of "messy HTML" by converting the DOM into a cleaning Semantic Map.</p>
+        <ul>
+            <li><strong>Filtering:</strong> Removes scripts, ads, and invisible nodes.</li>
+            <li><strong>Clustering:</strong> Groups related elements (e.g., Image + Title + Price = "Product Card").
+            </li>
+        </ul>
+
+        <p><strong>What the AI actually sees (JSON Representation):</strong></p>
+        <pre><code>{
+  "pageType": "ProductListing",
+  "clusters": [
+    {
+      "type": "ProductCard",
+      "content": "iPhone 15 - ₹79,000",
+      "interactiveElementId": 45  // The 'Buy Now' button
+    }
+  ]
+}</code></pre>
+
+        <h3 id="resilience">3. Resilience: <code>RecoveryEngine</code></h3>
+        <div class="warning">
+            <strong>The Problem:</strong> Web pages are dynamic. An element ID might change between the "Think" and
+            "Act" phases.
+        </div>
+        <p><strong>The Solution:</strong> If a click fails, the Recovery Engine kicks in.</p>
+        <pre><code>async function recover(failedAction) {
+    // Strategy 1: Fuzzy Match Text
+    // "Buy Now" (ID 45) is gone? Look for any button with "Buy Now".
+    const newId = await DOM.findClosestMatch(failedAction.targetText);
+    
+    if (newId) return performAction(newId);
+    
+    // Strategy 2: Re-plan
+    return await LLM.replanningStrength(failedAction);
+}</code></pre>
+
+        <h2 id="shopping">🛍️ Feature: Deep Research</h2>
+        <p>Nova doesn't just search; it researches. Here is the workflow for the "Shopping Agent":</p>
+        <ol>
+            <li><strong>Constraint Parsing:</strong> Extracts "Budget: < 20k", "Year: 2025" from user prompt.</li>
+            <li><strong>Knowledge Gathering:</strong> Reads "Best of" blog posts to find top models.</li>
+            <li><strong>Multi-Site Price Check:</strong> Spiders across Amazon, Flipkart, and Croma simultaneously.</li>
+            <li><strong>Deal Analysis:</strong> Calculates final price including bank offers.</li>
+        </ol>
+
+        <h2 id="extending">🛠️ Extending Nova</h2>
+        <p>Developers can add new "Skills" to the agent easily.</p>
+
+        <p><strong>Example: Adding a "Download" capability</strong></p>
+        <pre><code>// 1. Register Action in HybridCore.js
+const actions = {
+    "DOWNLOAD": async (url) => {
+        chrome.downloads.download({ url: url });
+    }
+};
+
+// 2. Teach the System Prompt
+const prompt = `
+CORE ACTIONS:
+- CLICK
+- TYPE
+- DOWNLOAD: Use this when user wants to save a file.
+`;</code></pre>
+
+        <h2 id="security">🔒 Security & Config</h2>
+        <p>All sensitive keys are stored locally in <code>chrome.storage.local</code>.</p>
+        <pre><code># .env.example
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-key</code></pre>
+
+        <hr>
+        <div style="text-align: center; color: #888; margin-top: 50px; font-size: 0.8em;">
+            &copy; 2026 Nova Browser Agent. Built for the Future.
+        </div>
+
+    </div>
+
+</body>
+
+</html>
