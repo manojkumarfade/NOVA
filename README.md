@@ -166,6 +166,119 @@ Explore Nova's capabilities through these powerful features.
 
 ---
 
+## 🎬 Comprehensive Video Demonstrations
+
+Explore detailed walkthroughs of Nova's capabilities.
+
+<table width="100%">
+  <tr>
+    <th width="30%">Feature Details</th>
+    <th width="70%">Video Demonstration</th>
+  </tr>
+
+  <!-- 1. Agent Mode -->
+  <tr>
+    <td valign="top">
+        <h3>🧠 Agent Mode</h3>
+        <p><b>The Core Brain.</b> Watch Nova reason through tasks, plan steps, and execute complex browser interactions dynamically.</p>
+    </td>
+    <td>
+        <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Agent%20Mode.mp4" controls="controls" width="100%"></video>
+    </td>
+  </tr>
+
+  <!-- 2. Shopping Agent -->
+  <tr>
+    <td valign="top">
+        <h3>🛍️ Shopping Agent</h3>
+        <p><b>Smart Buying.</b> Demonstrating price comparison, specification extraction, and cross-platform deal finding.</p>
+    </td>
+    <td>
+        <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Shopping%20Agent.mp4" controls="controls" width="100%"></video>
+    </td>
+  </tr>
+
+  <!-- 3. Web Search Agent -->
+  <tr>
+    <td valign="top">
+        <h3>🌐 Web Search Agent</h3>
+        <p><b>Deep Research.</b> See how Nova browses the live web to synthesize answers from multiple sources.</p>
+    </td>
+    <td>
+        <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Web%20Search.mp4" controls="controls" width="100%"></video>
+    </td>
+  </tr>
+
+  <!-- 4. Files Analyzer -->
+  <tr>
+    <td valign="top">
+        <h3>📂 Files Analyzer</h3>
+        <p><b>Document Intelligence.</b> Analyzing local PDF/Doc files to extract insights and answer queries.</p>
+    </td>
+    <td>
+        <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Files%20Analyzer.mp4" controls="controls" width="100%"></video>
+    </td>
+  </tr>
+
+  <!-- 5. Image Generation -->
+  <tr>
+    <td valign="top">
+        <h3>🎨 Image Generation</h3>
+        <p><b>Creative Power.</b> Generating high-quality assets directly from natural language prompts.</p>
+    </td>
+    <td>
+        <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Image%20Generation.mp4" controls="controls" width="100%"></video>
+    </td>
+  </tr>
+
+  <!-- 6. Side Panel Overview -->
+  <tr>
+    <td valign="top">
+        <h3>💻 Side Panel Overview</h3>
+        <p><b>Unified Interface.</b> A tour of the sleek command center for managing all agents and settings.</p>
+    </td>
+    <td>
+        <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Side%20Panel%20Overview.mp4" controls="controls" width="100%"></video>
+    </td>
+  </tr>
+
+  <!-- 7. Text-to-Speech -->
+  <tr>
+    <td valign="top">
+        <h3>🗣️ Text-to-Speech (TTS)</h3>
+        <p><b>Voice Interaction.</b> Demonstrating Nova's ability to speak responses for accessibility and ease of use.</p>
+    </td>
+    <td>
+        <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/TTS.mp4" controls="controls" width="100%"></video>
+    </td>
+  </tr>
+
+  <!-- 8. Tutorial & Settings -->
+  <tr>
+    <td valign="top">
+        <h3>⚙️ Tutorial & Settings</h3>
+        <p><b>Customization.</b> How to configure the agent and access built-in guides.</p>
+    </td>
+    <td>
+        <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Tutorial%20&%20Settings.mp4" controls="controls" width="100%"></video>
+    </td>
+  </tr>
+
+  <!-- 9. Installation Guide -->
+  <tr>
+    <td valign="top">
+        <h3>🚀 Installation Guide</h3>
+        <p><b>Get Started.</b> Step-by-step walkthrough of installing the Nova extension.</p>
+    </td>
+    <td>
+        <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/How%20to%20install%20extension.mp4" controls="controls" width="100%"></video>
+    </td>
+  </tr>
+
+</table>
+
+---
+
 ## 🛠️ Tech Stack using Modern Standards
 
 | Category | Technologies |
