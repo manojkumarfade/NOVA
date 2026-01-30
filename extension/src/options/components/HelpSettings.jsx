@@ -162,7 +162,8 @@ const HelpSettings = () => {
       action: () => setShowVideoModal(true)
     },
     { label: 'Community Forum', icon: 'Users', url: 'https://t.me/nova_gent' },
-    { label: 'GitHub Repository', icon: 'Github', url: 'https://github.com/manojkumarfade' }
+    { label: 'GitHub Repository', icon: 'Github', url: 'https://github.com/manojkumarfade' },
+    { label: 'Live Chat Support', icon: 'MessageCircle', url: 'https://t.me/nova_gent' }
   ];
 
   return (
