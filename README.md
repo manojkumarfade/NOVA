@@ -21,16 +21,47 @@
 
 Explore Nova's capabilities through these powerful features.
 
-| Feature & Description | Visual Preview |
-| :--- | :--- |
-| **1. Agent Mode (The Brain)**<br>The core recursive reasoning loop. Visualizes the Planner -> Navigator -> Validator cycle and dynamic action execution.<br><br>[🎥 Watch Video](https://github.com/manojkumarfade/NOVA/raw/main/extension/dist/videos/Agent%20Mode.mp4) | ![Agent Mode](photos/Agentic%20mode.png) |
-| **2. Shopping Agent**<br>Specialized for e-commerce. Performs cross-platform price comparison, spec extraction, and deal analysis.<br><br>[🎥 Watch Video](https://github.com/manojkumarfade/NOVA/raw/main/extension/dist/videos/Shopping%20Agent.mp4) | ![Shopping Agent](photos/Shopping%20Agent.png) |
-| **3. Web Search Agent**<br>Autonomous research assistant. Synthesizes fact-based answers from live web data.<br><br>[🎥 Watch Video](https://github.com/manojkumarfade/NOVA/raw/main/extension/dist/videos/Web%20Search.mp4) | ![Web Search](photos/Web_search.png)<br>![Web Search 2](photos/Web_search2.png) |
-| **4. Image Generation**<br>Integrated diffusion models to synthesize assets directly from natural language prompts.<br><br>[🎥 Watch Video](https://github.com/manojkumarfade/NOVA/raw/main/extension/dist/videos/Image%20Generation.mp4) | ![Image Gen](photos/Image_gen.png)<br>![Image Gen 2](photos/Image_gen2.png) |
-| **5. Analytics Dashboard**<br>Track your usage, tokens, and agent performance metrics in real-time.<br><br> | ![Analytics](photos/Analytics.png)<br>![Analytics Dashboard](photos/Analytics_dashboard.png) |
-| **6. Security Firewall**<br>Blocks specific domains and trackers at the network level using `declarativeNetRequest`.<br><br> | ![Firewall](photos/Firewall.png) |
-| **7. DOM Interaction**<br>See how Nova "views" the web through its Visual Accessibility Tree.<br><br> | ![DOM Logic 2](photos/DOM%20Interaction2.png) |
-| **8. Live Chat & Support**<br>Real-time interaction and accessible support directly within the side panel.<br><br> | ![Live Chat](photos/Live_chat.png)<br>![Support](photos/Support.png) |
+### 🧠 Core Capabilities
+
+#### 1. Agent Mode (The Brain)
+The core recursive reasoning loop. Visualizes the Planner -> Navigator -> Validator cycle and dynamic action execution.
+<video src="extension/public/videos/Agent Mode.mp4" controls width="100%"></video>
+
+#### 2. Web Search Agent
+Autonomous research assistant. Synthesizes fact-based answers from live web data.
+<video src="extension/public/videos/Web Search.mp4" controls width="100%"></video>
+
+#### 3. Shopping Agent
+Specialized for e-commerce. Performs cross-platform price comparison, spec extraction, and deal analysis.
+<video src="extension/public/videos/Shopping Agent.mp4" controls width="100%"></video>
+
+#### 4. Image Generation
+Integrated diffusion models to synthesize assets directly from natural language prompts.
+<video src="extension/public/videos/Image Generation.mp4" controls width="100%"></video>
+
+### 📁 Management & Utilities
+
+#### 5. Files Analyzer
+Demonstration of local file system analysis capabilities.
+<video src="extension/public/videos/Files Analyzer.mp4" controls width="100%"></video>
+
+#### 6. Side Panel Overview
+A tour of the extension's side panel interface.
+<video src="extension/public/videos/Side Panel Overview.mp4" controls width="100%"></video>
+
+#### 7. Text-to-Speech (TTS)
+Demonstrating the voice interaction features.
+<video src="extension/public/videos/TTS.mp4" controls width="100%"></video>
+
+### ⚙️ Getting Started
+
+#### 8. Tutorial & Settings
+Configuration guide and initial tutorial.
+<video src="extension/public/videos/Tutorial & Settings.mp4" controls width="100%"></video>
+
+#### 9. Installation Guide
+Walkthrough on how to build and load the extension.
+<video src="extension/public/videos/How to install extension.mp4" controls width="100%"></video>
 
 ---
 
