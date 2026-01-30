@@ -1,160 +1,112 @@
 # Nova Browser Agent (AgenticBrowser)
 
 > **The Advanced AI-Powered Chrome Extension**
->
 > *Verified by Manoj Kumar. Powered by Nova Intelligence.*
 
 ---
 
 ## 📖 Overview
 
-**Nova** is not just a chatbot; it is an **Agentic execution engine** living inside your browser. Unlike traditional extensions that passively read content, Nova uses the **Chrome Debugger Protocol (CDP)** to actively drive the browser—clicking, scrolling, typing, and navigating just like a human user. It is built for privacy (local-first) and power (Bring Your Own Key).
+**Nova** is an **Agentic execution engine** living inside your browser. Not just a chatbot, Nova uses the **Chrome Debugger Protocol (CDP)** to actively drive the browser—clicking, scrolling, typing, and navigating like a human. 
 
-### 🔒 Privacy & Ownership
-*   **Owner**: **Manoj Kumar**
-*   **Privacy Model**: Local-First. Your data stays on your machine.
-*   **Key Storage**: Encrypted AES-256 in `chrome.storage.local`. Keys are never sent to our servers.
-*   **No Tracking**: We do not collect browsing history or analytics unless explicitly enabled.
+| **Ownership** | **Privacy Model** | **Security** |
+| :--- | :--- | :--- |
+| **Manoj Kumar** | **Local-First** (Data on your machine) | **AES-256 Encrypted** Keys |
 
 ---
 
-## 📽️ Feature Demonstrations
+## 📽️ Visual Showcase
 
-Explore the capabilities of Nova through these video walkthroughs.
+Explore Nova's capabilities through these powerful features.
 
-### 1. Agent Mode (The Brain)
-The core recursive reasoning loop. Visualizes the Planner -> Navigator -> Validator cycle, DOM tree traversal, and dynamic action execution on live web pages. 
-
-https://github.com/manojkumarfade/NOVA/assets/extension/dist/videos/Agent%20Mode.mp4
-
-### 2. Shopping Agent (Deep Research)
-A specialized vertical agent for e-commerce excellence. Features cross-platform price comparison, product specification extraction, and deal analysis algorithms to find the best value across multiple vendors.
-
-https://github.com/manojkumarfade/NOVA/assets/extension/dist/videos/Shopping%20Agent.mp4
-
-### 3. Web Search Agent
-Your autonomous research assistant. Formulates queries, scrapes SERPs, filters irrelevant results, and uses an LLM to synthesize concise, fact-based answers from live web data.
-
-https://github.com/manojkumarfade/NOVA/assets/extension/dist/videos/Web%20Search.mp4
-
-### 4. Image Generation
-Integrated capability to synthesize visual assets on the fly. Integrates diverse diffusion models to synthesize visual assets directly from natural language prompts.
-
-https://github.com/manojkumarfade/NOVA/assets/extension/dist/videos/Image%20Generation.mp4
-
-### 5. Files Analyzer (RAG)
-Technical overview of the RAG (Retrieval-Augmented Generation) pipeline. Demonstrates how the system parses, chunks, and embeds uploaded documents (PDFs, Code) for semantic search.
-
-https://github.com/manojkumarfade/NOVA/assets/extension/dist/videos/Files%20Analyzer.mp4
-
-### 6. Side Panel Overview
-Architectural tour of the primary interface. Detailed breakdown of the chat layer, context retention mechanisms, and the real-time event stream UI.
-
-https://github.com/manojkumarfade/NOVA/assets/extension/dist/videos/Side%20Panel%20Overview.mp4
-
-### 7. TTS (Text-to-Speech)
-Analysis of the Neural Text-to-Speech engine. Shows how text streams are converted to synthesized audio with low latency and high fidelity.
-
-https://github.com/manojkumarfade/NOVA/assets/extension/dist/videos/TTS.mp4
+| Feature & Description | Visual Preview |
+| :--- | :--- |
+| **1. Agent Mode (The Brain)**<br>The core recursive reasoning loop. Visualizes the Planner -> Navigator -> Validator cycle and dynamic action execution.<br><br>[🎥 Watch Video](https://github.com/manojkumarfade/NOVA/assets/extension/dist/videos/Agent%20Mode.mp4) | ![Agent Mode](photos/Agentic%20mode.png) |
+| **2. Shopping Agent**<br>Specialized for e-commerce. Performs cross-platform price comparison, spec extraction, and deal analysis.<br><br>[🎥 Watch Video](https://github.com/manojkumarfade/NOVA/assets/extension/dist/videos/Shopping%20Agent.mp4) | ![Shopping Agent](photos/Shopping%20Agent.png) |
+| **3. Web Search Agent**<br>Autonomous research assistant. Scrapes SERPs, filters results, and synthesizes answers from live web data.<br><br>[🎥 Watch Video](https://github.com/manojkumarfade/NOVA/assets/extension/dist/videos/Web%20Search.mp4) | ![Web Search](photos/Web_search.png) |
+| **4. Image Generation**<br>Integrated diffusion models to synthesize assets directly from natural language prompts.<br><br>[🎥 Watch Video](https://github.com/manojkumarfade/NOVA/assets/extension/dist/videos/Image%20Generation.mp4) | ![Image Gen](photos/Image_gen.png) |
+| **5. Analytics Dashboard**<br>Track your usage, tokens, and agent performance metrics in real-time.<br><br> | ![Analytics](photos/Analytics.png) |
+| **6. Security Firewall**<br>Blocks specific domains and trackers at the network level using `declarativeNetRequest`.<br><br> | ![Firewall](photos/Firewall.png) |
+| **7. DOM Interaction**<br>See how Nova "views" the web through its Visual Accessibility Tree.<br><br> | ![DOM Logic](photos/DOM%20Interaction.png) |
 
 ---
 
-## 🛠️ Tech Stack & Architecture
+## 🛠️ Tech Stack using Modern Standards
 
-Built on modern, type-safe foundations.
-
-*   **Core**: React 18, Vite 5, TailwindCSS
-*   **Runtime**: Manifest V3 (Service Worker based)
-*   **Protocol**: Chrome Debugger Protocol (CDP) via `chrome.debugger`
-*   **State**: Zustand + Supabase (Auth)
-*   **Animation**: Framer Motion
-*   **AI Models**: OpenAI GPT-4o, Anthropic Claude 3.5 Sonnet, Gemini Flash 1.5
+| Category | Technologies |
+| :--- | :--- |
+| **Core Framework** | React 18, Vite 5, TailwindCSS |
+| **Extension Runtime** | Manifest V3 (Service Worker based) |
+| **Browser Protocol** | Chrome Debugger Protocol (CDP) |
+| **State Management** | Zustand + Supabase (Auth) |
+| **AI Models** | GPT-4o, Claude 3.5 Sonnet, Gemini Flash 1.5 |
 
 ---
 
-## 🧩 Core Concepts & Code
+## 🚀 Quick Start Guide
 
-### DOM Analysis (The Eyes)
-Nova "sees" the web by stripping noise and creating a **Visual Accessibility Tree**.
+**1. Clone the repository**
+```bash
+git clone https://github.com/manojkumarfade/NOVA.git
+cd NOVA
+```
 
-**Code Logic (`Observer.js`):**
+**2. Install Dependencies**
+```bash
+npm install
+```
+
+**3. Build the Extension**
+```bash
+npm run build:extension
+# Generates production build in extension/dist
+```
+
+**4. Load in Chrome**
+1. Open `chrome://extensions`
+2. Enable **Developer Mode**
+3. Click **Load Unpacked** -> Select `extension/dist`
+
+---
+
+## 🧩 Core Logic (Under the Hood)
+
+<details>
+<summary><b>👁️ DOM Analysis (The Eyes)</b></summary>
+<br>
+Nova scans the DOM and assigns unique IDs to interactive elements to create a Visual Accessibility Tree.
+
 ```javascript
-// Scans the DOM and assigns unique IDs to interactive elements
 function getBrowserState() {
-    const interactives = document.querySelectorAll('button, a, input, [role="button"]');
+    const interactives = document.querySelectorAll('button, a, input');
     return Array.from(interactives).map((el, index) => ({
         id: index + 1,
         tag: el.tagName,
-        text: el.innerText || el.ariaLabel,
-        rect: el.getBoundingClientRect() // Used for coordinate-based clicking
+        rect: el.getBoundingClientRect()
     }));
 }
 ```
+</details>
 
-### Hybrid Execution (The Hands)
-Handles modern React/Angular apps that block programmatic clicks by falling back to CDP hardware simulation.
+<details>
+<summary><b>🤖 Hybrid Execution (The Hands)</b></summary>
+<br>
+Handles modern apps by falling back to CDP hardware simulation when JS clicks fail.
 
-**Code Logic (`Navigator.js`):**
 ```javascript
 async executeStep(action) {
     if (action.action === "CLICK") {
-        // 1. Try Standard JS Click
         const jsSuccess = await this.tryJSClick(action.id);
         if (!jsSuccess) {
-            // 2. Fallback: Hardware Mouse Simulation via CDP
-            const { x, y } = action.coordinates;
+            // Hardware Mouse Simulation
              await chrome.debugger.sendCommand({ tabId }, "Input.dispatchMouseEvent", { 
                 type: "mousePressed", x, y, button: "left" 
-            });
-            await chrome.debugger.sendCommand({ tabId }, "Input.dispatchMouseEvent", { 
-                type: "mouseReleased", x, y, button: "left" 
             });
         }
     }
 }
 ```
-
-### Firewall Logic (Security)
-Blocks specific domains/patterns at the network level using `declarativeNetRequest`.
-
-**Code Logic (`FirewallService.js`):**
-```javascript
-chrome.declarativeNetRequest.updateDynamicRules({
-    addRules: [{
-        id: 1,
-        priority: 1,
-        action: { type: 'block' },
-        condition: { urlFilter: "||doubleclick.net", resourceTypes: ["script"] }
-    }]
-});
-```
-
----
-
-## 🚀 Installation
-
-1.  **Clone the repository**:
-    ```bash
-    git clone https://github.com/manojkumarfade/NOVA.git
-    cd NOVA
-    ```
-
-2.  **Install dependencies**:
-    ```bash
-    npm install
-    ```
-
-3.  **Build the Extension**:
-    ```bash
-    npm run build:extension
-    ```
-    *This will generate the production build in `extension/dist`.*
-
-4.  **Load in Chrome**:
-    *   Open `chrome://extensions`
-    *   Enable **Developer Mode** (top right)
-    *   Click **Load Unpacked**
-    *   Select the `extension/dist` folder
+</details>
 
 ---
 
