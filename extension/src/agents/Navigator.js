@@ -126,7 +126,7 @@ export class Navigator {
                         const jsClick = `
                             (() => {
                                 // 1. Try finding by Unique Rockett ID (Gold Standard)
-                                let el = document.querySelector('[data-rockett-id="${action.id}"]');
+                                let el = document.querySelector('[data-nova-id="${action.id}"]');
                                 
                                 // [NEW] Text Search Fallback (Primary for CLICK_TEXT)
                                 if (!el) {
@@ -222,7 +222,7 @@ export class Navigator {
                 if (action.action.startsWith("TYPE")) {
                     const jsFocus = `
                             (() => {
-                                let el = document.querySelector('[data-rockett-id="${action.id}"]');
+                                let el = document.querySelector('[data-nova-id="${action.id}"]');
                                 if (!el && '${action.action}' === 'TYPE_TEXT') {
                                      // Find input by placeholder usually
                                      const clean = (str) => (str || "").toLowerCase().trim();

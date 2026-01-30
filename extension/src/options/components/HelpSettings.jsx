@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import Icon from '../../shared/components/AppIcon';
 import Button from '../../shared/components/ui/Button';
+import { novaManualContent } from './NovaManualContent';
 
 const HelpSettings = () => {
   const [expandedSection, setExpandedSection] = useState(null);
   const [showVideoModal, setShowVideoModal] = useState(false);
+  const [showDocsModal, setShowDocsModal] = useState(false);
 
   // Video Tutorials Data
   const videoTutorials = [
@@ -50,7 +54,7 @@ const HelpSettings = () => {
     },
     {
       title: 'Agent Mode (The Brain)',
-      description: 'The core recursive reasoning loop. Visualizes the Planner -> Navigator -> Validator cycle, DOM tree traversal, and dynamic action execution on live web pages. This is the central intelligence of the Rocket extension.',
+      description: 'The core recursive reasoning loop. Visualizes the Planner -> Navigator -> Validator cycle, DOM tree traversal, and dynamic action execution on live web pages. This is the central intelligence of the Nova extension.',
       videoSrc: 'videos/Agent Mode.mp4'
     }
   ];
@@ -59,17 +63,17 @@ const HelpSettings = () => {
     {
       id: 'getting-started',
       title: 'Getting Started',
-      icon: 'Rocket',
+      icon: 'Nova',
       color: 'text-primary',
       bgColor: 'bg-primary/10',
       items: [
         {
-          question: 'How do I initialize the Rocket extension?',
-          answer: 'Rocket is installed as an unpacked extension. Enable "Developer Mode" in chrome://extensions, click "Load Unpacked", and select the extension directory. Ensure your `manifest.json` is valid and permissions are granted.'
+          question: 'How do I initialize the Nova extension?',
+          answer: 'Nova is installed as an unpacked extension. Enable "Developer Mode" in chrome://extensions, click "Load Unpacked", and select the extension directory. Ensure your `manifest.json` is valid and permissions are granted.'
         },
         {
           question: 'Configuring LLM Providers',
-          answer: 'Navigate to Settings > LLM Providers. Rocket supports OpenAI, Anthropic, and Gemini. Enter your API key securely. The key is encrypted locally and never sent to our servers. Only direct calls to the provider are made.'
+          answer: 'Navigate to Settings > LLM Providers. Nova supports OpenAI, Anthropic, and Gemini. Enter your API key securely. The key is encrypted locally and never sent to our servers. Only direct calls to the provider are made.'
         },
         {
           question: 'Activating Agent Mode',
@@ -86,7 +90,7 @@ const HelpSettings = () => {
       items: [
         {
           question: 'The Multi-Agent Architecture',
-          answer: 'Rocket uses a tripartite system:\n• **Planner**: Decomposes high-level goals into executable steps.\n• **Navigator**: Executes DOM actions (click, type, scroll) using CSS selectors and XPath.\n• **Validator**: Verifies step completion using visual and DOM-based checks.'
+          answer: 'Nova uses a tripartite system:\n• **Planner**: Decomposes high-level goals into executable steps.\n• **Navigator**: Executes DOM actions (click, type, scroll) using CSS selectors and XPath.\n• **Validator**: Verifies step completion using visual and DOM-based checks.'
         },
         {
           question: 'Vision & DOM Analysis',
@@ -115,7 +119,7 @@ const HelpSettings = () => {
         },
         {
           question: 'Page Access Permissions',
-          answer: 'Rocket only accesses the active tab when you explicitly trigger an agent command. It does not background-scrape your browsing history unless "History Awareness" is explicitly enabled in Settings.'
+          answer: 'Nova only accesses the active tab when you explicitly trigger an agent command. It does not background-scrape your browsing history unless "History Awareness" is explicitly enabled in Settings.'
         }
       ]
     },
@@ -147,7 +151,11 @@ const HelpSettings = () => {
   };
 
   const resources = [
-    { label: 'Documentation', icon: 'BookOpen', url: '#' },
+    {
+      label: 'Documentation',
+      icon: 'BookOpen',
+      action: () => setShowDocsModal(true)
+    },
     {
       label: 'Video Tutorials',
       icon: 'Video',
@@ -304,7 +312,7 @@ const HelpSettings = () => {
                     Video Tutorials
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    Watch demo videos to learn more about Rocket
+                    Watch demo videos to learn more about Nova
                   </p>
                 </div>
               </div>
@@ -352,8 +360,43 @@ const HelpSettings = () => {
             </div>
           </div>
         </div>
-      )
-      }
+      )}
+
+      {showDocsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-background border border-border rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-4 md:p-6 border-b border-border">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-500/10">
+                  <Icon name="BookOpen" size={20} className="text-blue-500" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-heading font-semibold text-foreground">
+                    Documentation
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Official Nova Browser Agent Manual
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setShowDocsModal(false)}
+                className="hover:bg-muted"
+              >
+                <Icon name="X" size={20} />
+              </Button>
+            </div>
+
+            <div className="overflow-y-auto p-4 md:p-6 prose prose-sm md:prose-base dark:prose-invert max-w-none">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {novaManualContent}
+              </ReactMarkdown>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

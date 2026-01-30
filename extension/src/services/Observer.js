@@ -3,7 +3,7 @@
 export const Observer = {
     getBrowserState: function () {
         // 1. Cleanup old attributes/tags
-        document.querySelectorAll('[data-rockett-id]').forEach(el => el.removeAttribute('data-rockett-id'));
+        document.querySelectorAll('[data-nova-id]').forEach(el => el.removeAttribute('data-nova-id'));
         const tags = document.querySelectorAll('.agent-id-tag');
         tags.forEach(e => e.remove());
 
@@ -26,7 +26,7 @@ export const Observer = {
                 getComputedStyle(el).display !== 'none'
             ) {
                 // Mark the element reliably
-                el.setAttribute('data-rockett-id', idCounter);
+                el.setAttribute('data-nova-id', idCounter);
 
                 interactiveMap.push({
                     id: idCounter,
@@ -75,7 +75,7 @@ export const Observer = {
         };
     },
     cleanup: function () {
-        document.querySelectorAll('[data-rockett-id]').forEach(el => el.removeAttribute('data-rockett-id'));
+        document.querySelectorAll('[data-nova-id]').forEach(el => el.removeAttribute('data-nova-id'));
         const tags = document.querySelectorAll('.agent-id-tag');
         tags.forEach(e => e.remove());
     }

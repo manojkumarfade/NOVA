@@ -56,7 +56,7 @@ const AuthPage = ({ onLoginSuccess }) => {
             <div className="w-full max-w-sm space-y-8">
                 <div className="text-center">
                     <h2 className="mt-6 text-3xl font-extrabold text-white">
-                        {isLogin ? 'Sign in to Rockett' : 'Create Account'}
+                        {isLogin ? 'Sign in to Nova' : 'Create Account'}
                     </h2>
                     <p className="mt-2 text-sm text-gray-400">
                         {isLogin ? "Don't have an account? " : "Already have an account? "}

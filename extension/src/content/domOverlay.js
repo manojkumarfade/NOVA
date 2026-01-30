@@ -2,7 +2,7 @@ let overlayRoot = null;
 let overlays = [];
 let enabled = false;
 
-const ROOT_ID = "__rockett_dom_overlay__";
+const ROOT_ID = "__nova_dom_overlay__";
 
 function createRoot() {
     if (overlayRoot) return overlayRoot;
@@ -81,11 +81,11 @@ function scan() {
     clear();
     createRoot();
 
-    const nodes = document.querySelectorAll('[data-rockett-id]');
+    const nodes = document.querySelectorAll('[data-nova-id]');
 
     nodes.forEach(el => {
         if (!isVisible(el)) return;
-        const id = el.getAttribute('data-rockett-id');
+        const id = el.getAttribute('data-nova-id');
         drawBox(id, el.getBoundingClientRect());
     });
 }

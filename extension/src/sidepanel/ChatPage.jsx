@@ -67,7 +67,7 @@ const MainChatInterface = () => {
 
       // [modified] START NEW CHAT ON OPEN, BUT PERSIST DURING NAVIGATION
       // We use sessionStorage (cleared when panel closes) to detect "Fresh Open".
-      const isSessionActive = sessionStorage.getItem('rocket_session_active');
+      const isSessionActive = sessionStorage.getItem('nova_session_active');
 
       if (isSessionActive) {
         // Navigating back from History/Settings -> RESTORE
@@ -82,7 +82,7 @@ const MainChatInterface = () => {
       // Fresh Open or No Valid Last Id -> NEW CHAT
       const newId = `conv-${Date.now()}`;
       setActiveConversationId(newId);
-      sessionStorage.setItem('rocket_session_active', 'true');
+      sessionStorage.setItem('nova_session_active', 'true');
     };
     init();
   }, [session]);
