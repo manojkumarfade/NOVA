@@ -21,18 +21,115 @@
 
 Explore Nova's capabilities through these powerful features.
 
-| Feature & Description | Visual Experience |
-| :--- | :--- |
-| **1. Agent Mode (The Brain)**<br>Experience the core recursive reasoning loop in action. Nova decomposes complex user requests into executable steps using its **Planner**, executes them via the **Navigator**, and self-corrects using the **Validator**. Watch as it dynamically interacts with the browser, handling errors and refining its approach in real-time.<br><br>_Watch how Nova thinks and acts._ | <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Agent%20Mode.mp4" controls="controls" width="100%"></video><br><br>![Agent Mode](photos/Agentic%20mode.png)<br>![Agent Mode 2](photos/Agentic%20mode2.png) |
-| **2. Shopping Agent**<br>Your personal e-commerce assistant. Nova autonomously navigates multiple online stores (like Amazon, Flipkart), extracts detailed product specifications, compares prices across platforms, and presents a comprehensive deal analysis so you never overpay.<br><br>_See Nova find the best deals._ | <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Shopping%20Agent.mp4" controls="controls" width="100%"></video><br><br>![Shopping Agent](photos/Shopping%20Agent.png)<br>![Shopping Agent 2](photos/Shopping2.png) |
-| **3. Files Analyzer**<br>Unlock insights from your local documents. Simply upload files (PDFs, Docs), and Nova's intelligent parsing engine will summarize contents, answer specific questions, and extract key data points, turning static files into interactive knowledge.<br><br>_Unlock insights from your files._ | <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Files%20Analyzer.mp4" controls="controls" width="100%"></video><br><br>![Files Analyzer](photos/Files%20Analyzer.png) |
-| **4. Web Search Agent**<br>An autonomous research powerhouse. Nova browses the live web, reads multiple sources, filters out noise, and synthesizes fact-based answers with citations. It's like having a human researcher working for you at machine speed.<br><br>_Research made effortless._ | <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Web%20Search.mp4" controls="controls" width="100%"></video><br><br>![Web Search](photos/Web_search.png)<br>![Web Search 2](photos/Web_search2.png) |
-| **5. Image Generation**<br>Bring ideas to life instantly. Using integrated diffusion models, Nova can generate high-quality visual assets directly within the browser based on your natural language prompts—perfect for designers, creators, and visual thinkers.<br><br>_Create visuals instantly._ | <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Image%20Generation.mp4" controls="controls" width="100%"></video><br><br>![Image Gen](photos/Image_gen.png)<br>![Image Gen 2](photos/Image_gen2.png) |
-| **6. Side Panel Overview**<br>Your command center, always a click away. The sleek Side Panel interface provides unified access to all agents and tools without cluttering your browsing experience. Manage tasks, view history, and switch modes seamlessly.<br><br>_Your command center._ | <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Side%20Panel%20Overview.mp4" controls="controls" width="100%"></video><br><br>![Side Panel](photos/Side%20panel.png) |
-| **7. Text-to-Speech (TTS) & Chat**<br>Interact naturally with voice. Nova features advanced Text-to-Speech capabilities, allowing it to speak responses for a truly hands-free experience. Combined with a rich chat history, conversations feel fluid and accessible.<br><br>_Listen to Nova speak._ | <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/TTS.mp4" controls="controls" width="100%"></video><br><br>![TTS](photos/TTS.png)<br>![Chat History](photos/Chat_history.png) | 
-| **8. Tutorial, Settings & Support**<br>Full control at your fingertips. Customize agent behavior, manage privacy settings, and access guided tutorials to master Nova's features. Built-in support ensures you're never left guessing.<br><br>_Customize your experience._ | <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Tutorial%20&%20Settings.mp4" controls="controls" width="100%"></video><br><br>![Support](photos/Support.png)<br>![Live Chat](photos/Live_chat.png) |
-| **9. Security & DOM Vision**<br>See what Nova sees. The **Visual Accessibility Tree** maps the DOM for precise interaction, while the built-in **Security Firewall** proactively blocks trackers and malicious domains using `declarativeNetRequest`.<br> | ![Firewall](photos/Firewall.png)<br>![DOM Interaction](photos/DOM%20Interaction.png)<br>![DOM Logic 2](photos/DOM%20Interaction2.png)<br>![DOM With Image](photos/Dom%20with%20image.png) |
-| **10. Analytics Dashboard**<br>Transparency first. Monitor real-time usage metrics, track token consumption, and analyze agent performance. Stay informed about costs and efficiency with detailed visualizations.<br> | ![Analytics](photos/Analytics.png)<br>![Analytics Dashboard](photos/Analytics_dashboard.png) |
+### 1. Agent Mode (The Brain)
+Experience the core recursive reasoning loop in action. Nova decomposes complex user requests into executable steps using its **Planner**, executes them via the **Navigator**, and self-corrects using the **Validator**. Watch as it dynamically interacts with the browser, handling errors and refining its approach in real-time.
+
+_Watch how Nova thinks and acts._
+
+<video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Agent%20Mode.mp4" controls="controls" width="100%"></video>
+
+![Agent Mode](photos/Agentic%20mode.png)
+![Agent Mode 2](photos/Agentic%20mode2.png)
+
+---
+
+### 2. Shopping Agent
+Your personal e-commerce assistant. Nova autonomously navigates multiple online stores (like Amazon, Flipkart), extracts detailed product specifications, compares prices across platforms, and presents a comprehensive deal analysis so you never overpay.
+
+_See Nova find the best deals._
+
+<video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Shopping%20Agent.mp4" controls="controls" width="100%"></video>
+
+![Shopping Agent](photos/Shopping%20Agent.png)
+![Shopping Agent 2](photos/Shopping2.png)
+
+---
+
+### 3. Files Analyzer
+Unlock insights from your local documents. Simply upload files (PDFs, Docs), and Nova's intelligent parsing engine will summarize contents, answer specific questions, and extract key data points, turning static files into interactive knowledge.
+
+_Unlock insights from your files._
+
+<video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Files%20Analyzer.mp4" controls="controls" width="100%"></video>
+
+![Files Analyzer](photos/Files%20Analyzer.png)
+
+---
+
+### 4. Web Search Agent
+An autonomous research powerhouse. Nova browses the live web, reads multiple sources, filters out noise, and synthesizes fact-based answers with citations. It's like having a human researcher working for you at machine speed.
+
+_Research made effortless._
+
+<video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Web%20Search.mp4" controls="controls" width="100%"></video>
+
+![Web Search](photos/Web_search.png)
+![Web Search 2](photos/Web_search2.png)
+
+---
+
+### 5. Image Generation
+Bring ideas to life instantly. Using integrated diffusion models, Nova can generate high-quality visual assets directly within the browser based on your natural language prompts—perfect for designers, creators, and visual thinkers.
+
+_Create visuals instantly._
+
+<video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Image%20Generation.mp4" controls="controls" width="100%"></video>
+
+![Image Gen](photos/Image_gen.png)
+![Image Gen 2](photos/Image_gen2.png)
+
+---
+
+### 6. Side Panel Overview
+Your command center, always a click away. The sleek Side Panel interface provides unified access to all agents and tools without cluttering your browsing experience. Manage tasks, view history, and switch modes seamlessly.
+
+_Your command center._
+
+<video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Side%20Panel%20Overview.mp4" controls="controls" width="100%"></video>
+
+![Side Panel](photos/Side%20panel.png)
+
+---
+
+### 7. Text-to-Speech (TTS) & Chat
+Interact naturally with voice. Nova features advanced Text-to-Speech capabilities, allowing it to speak responses for a truly hands-free experience. Combined with a rich chat history, conversations feel fluid and accessible.
+
+_Listen to Nova speak._
+
+<video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/TTS.mp4" controls="controls" width="100%"></video>
+
+![TTS](photos/TTS.png)
+![Chat History](photos/Chat_history.png)
+
+---
+
+### 8. Tutorial, Settings & Support
+Full control at your fingertips. Customize agent behavior, manage privacy settings, and access guided tutorials to master Nova's features. Built-in support ensures you're never left guessing.
+
+_Customize your experience._
+
+<video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Tutorial%20&%20Settings.mp4" controls="controls" width="100%"></video>
+
+![Support](photos/Support.png)
+![Live Chat](photos/Live_chat.png)
+
+---
+
+### 9. Security & DOM Vision
+See what Nova sees. The **Visual Accessibility Tree** maps the DOM for precise interaction, while the built-in **Security Firewall** proactively blocks trackers and malicious domains using `declarativeNetRequest`.
+
+![Firewall](photos/Firewall.png)
+![DOM Interaction](photos/DOM%20Interaction.png)
+![DOM Logic 2](photos/DOM%20Interaction2.png)
+![DOM With Image](photos/Dom%20with%20image.png)
+
+---
+
+### 10. Analytics Dashboard
+Transparency first. Monitor real-time usage metrics, track token consumption, and analyze agent performance. Stay informed about costs and efficiency with detailed visualizations.
+
+![Analytics](photos/Analytics.png)
+![Analytics Dashboard](photos/Analytics_dashboard.png)
 
 ---
 
