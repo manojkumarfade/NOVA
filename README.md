@@ -183,7 +183,9 @@ Explore detailed walkthroughs of Nova's capabilities.
         <p><b>The Core Brain.</b> Watch Nova reason through tasks, plan steps, and execute complex browser interactions dynamically.</p>
     </td>
     <td>
-        <video src="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/Agent%20Mode.mp4" controls="controls" width="100%"></video>
+        <a href="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/Agent%20Mode.mp4">
+            <img src="https://img.shields.io/badge/📥_Download_/_Watch-Agent_Mode-blue?style=for-the-badge&logo=github" alt="Watch Agent Mode" />
+        </a>
     </td>
   </tr>
 
@@ -194,7 +196,9 @@ Explore detailed walkthroughs of Nova's capabilities.
         <p><b>Smart Buying.</b> Demonstrating price comparison, specification extraction, and cross-platform deal finding.</p>
     </td>
     <td>
-        <video src="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/Shopping%20Agent.mp4" controls="controls" width="100%"></video>
+        <a href="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/Shopping%20Agent.mp4">
+            <img src="https://img.shields.io/badge/📥_Download_/_Watch-Shopping_Agent-blue?style=for-the-badge&logo=github" alt="Watch Shopping Agent" />
+        </a>
     </td>
   </tr>
 
@@ -205,7 +209,9 @@ Explore detailed walkthroughs of Nova's capabilities.
         <p><b>Deep Research.</b> See how Nova browses the live web to synthesize answers from multiple sources.</p>
     </td>
     <td>
-        <video src="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/Web%20Search.mp4" controls="controls" width="100%"></video>
+        <a href="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/Web%20Search.mp4">
+            <img src="https://img.shields.io/badge/📥_Download_/_Watch-Web_Search_Agent-blue?style=for-the-badge&logo=github" alt="Watch Web Search" />
+        </a>
     </td>
   </tr>
 
@@ -216,7 +222,9 @@ Explore detailed walkthroughs of Nova's capabilities.
         <p><b>Document Intelligence.</b> Analyzing local PDF/Doc files to extract insights and answer queries.</p>
     </td>
     <td>
-        <video src="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/Files%20Analyzer.mp4" controls="controls" width="100%"></video>
+        <a href="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/Files%20Analyzer.mp4">
+            <img src="https://img.shields.io/badge/📥_Download_/_Watch-Files_Analyzer-blue?style=for-the-badge&logo=github" alt="Watch Files Analyzer" />
+        </a>
     </td>
   </tr>
 
@@ -227,7 +235,9 @@ Explore detailed walkthroughs of Nova's capabilities.
         <p><b>Creative Power.</b> Generating high-quality assets directly from natural language prompts.</p>
     </td>
     <td>
-        <video src="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/Image%20Generation.mp4" controls="controls" width="100%"></video>
+        <a href="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/Image%20Generation.mp4">
+            <img src="https://img.shields.io/badge/📥_Download_/_Watch-Image_Generation-blue?style=for-the-badge&logo=github" alt="Watch Image Generation" />
+        </a>
     </td>
   </tr>
 
@@ -238,7 +248,9 @@ Explore detailed walkthroughs of Nova's capabilities.
         <p><b>Unified Interface.</b> A tour of the sleek command center for managing all agents and settings.</p>
     </td>
     <td>
-        <video src="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/Side%20Panel%20Overview.mp4" controls="controls" width="100%"></video>
+        <a href="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/Side%20Panel%20Overview.mp4">
+            <img src="https://img.shields.io/badge/📥_Download_/_Watch-Side_Panel_Overview-blue?style=for-the-badge&logo=github" alt="Watch Side Panel Overview" />
+        </a>
     </td>
   </tr>
 
@@ -249,7 +261,9 @@ Explore detailed walkthroughs of Nova's capabilities.
         <p><b>Voice Interaction.</b> Demonstrating Nova's ability to speak responses for accessibility and ease of use.</p>
     </td>
     <td>
-        <video src="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/TTS.mp4" controls="controls" width="100%"></video>
+        <a href="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/TTS.mp4">
+            <img src="https://img.shields.io/badge/📥_Download_/_Watch-TTS_&_Chat-blue?style=for-the-badge&logo=github" alt="Watch TTS" />
+        </a>
     </td>
   </tr>
 
@@ -260,7 +274,9 @@ Explore detailed walkthroughs of Nova's capabilities.
         <p><b>Customization.</b> How to configure the agent and access built-in guides.</p>
     </td>
     <td>
-        <video src="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/Tutorial%20&%20Settings.mp4" controls="controls" width="100%"></video>
+        <a href="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/Tutorial%20&%20Settings.mp4">
+            <img src="https://img.shields.io/badge/📥_Download_/_Watch-Tutorial_&_Settings-blue?style=for-the-badge&logo=github" alt="Watch Tutorial" />
+        </a>
     </td>
   </tr>
 
@@ -271,7 +287,9 @@ Explore detailed walkthroughs of Nova's capabilities.
         <p><b>Get Started.</b> Step-by-step walkthrough of installing the Nova extension.</p>
     </td>
     <td>
-        <video src="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/How%20to%20install%20extension.mp4" controls="controls" width="100%"></video>
+        <a href="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/How%20to%20install%20extension.mp4">
+            <img src="https://img.shields.io/badge/📥_Download_/_Watch-Installation_Guide-blue?style=for-the-badge&logo=github" alt="Watch Installation Guide" />
+        </a>
     </td>
   </tr>
 
