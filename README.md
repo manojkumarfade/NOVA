@@ -21,47 +21,18 @@
 
 Explore Nova's capabilities through these powerful features.
 
-### 🧠 Core Capabilities
-
-#### 1. Agent Mode (The Brain)
-The core recursive reasoning loop. Visualizes the Planner -> Navigator -> Validator cycle and dynamic action execution.
-<video src="extension/public/videos/Agent Mode.mp4" controls width="100%"></video>
-
-#### 2. Web Search Agent
-Autonomous research assistant. Synthesizes fact-based answers from live web data.
-<video src="extension/public/videos/Web Search.mp4" controls width="100%"></video>
-
-#### 3. Shopping Agent
-Specialized for e-commerce. Performs cross-platform price comparison, spec extraction, and deal analysis.
-<video src="extension/public/videos/Shopping Agent.mp4" controls width="100%"></video>
-
-#### 4. Image Generation
-Integrated diffusion models to synthesize assets directly from natural language prompts.
-<video src="extension/public/videos/Image Generation.mp4" controls width="100%"></video>
-
-### 📁 Management & Utilities
-
-#### 5. Files Analyzer
-Demonstration of local file system analysis capabilities.
-<video src="extension/public/videos/Files Analyzer.mp4" controls width="100%"></video>
-
-#### 6. Side Panel Overview
-A tour of the extension's side panel interface.
-<video src="extension/public/videos/Side Panel Overview.mp4" controls width="100%"></video>
-
-#### 7. Text-to-Speech (TTS)
-Demonstrating the voice interaction features.
-<video src="extension/public/videos/TTS.mp4" controls width="100%"></video>
-
-### ⚙️ Getting Started
-
-#### 8. Tutorial & Settings
-Configuration guide and initial tutorial.
-<video src="extension/public/videos/Tutorial & Settings.mp4" controls width="100%"></video>
-
-#### 9. Installation Guide
-Walkthrough on how to build and load the extension.
-<video src="extension/public/videos/How to install extension.mp4" controls width="100%"></video>
+| Feature & Description | Visual Experience |
+| :--- | :--- |
+| **1. Agent Mode (The Brain)**<br>The core recursive reasoning loop. Visualizes the Planner -> Navigator -> Validator cycle and dynamic action execution.<br><br>_Watch how Nova thinks and acts._ | <video src="extension/public/videos/Agent Mode.mp4" controls="controls" width="100%"></video> |
+| **2. Shopping Agent**<br>Specialized for e-commerce. Performs cross-platform price comparison, spec extraction, and deal analysis.<br><br>_See Nova find the best deals._ | <video src="extension/public/videos/Shopping Agent.mp4" controls="controls" width="100%"></video> |
+| **3. Files Analyzer**<br>Intelligent file reading and analysis. Upload documents and let Nova parse, summarize, and explain them for you.<br><br>_Unlock insights from your files._ | <video src="extension/public/videos/Files Analyzer.mp4" controls="controls" width="100%"></video> |
+| **4. Web Search Agent**<br>Autonomous research assistant. Synthesizes fact-based answers from live web data, providing up-to-date information.<br><br>_Research made effortless._ | <video src="extension/public/videos/Web Search.mp4" controls="controls" width="100%"></video> |
+| **5. Image Generation**<br>Integrated diffusion models to synthesize assets directly from natural language prompts.<br><br>_Create visuals instantly._ | <video src="extension/public/videos/Image Generation.mp4" controls="controls" width="100%"></video> |
+| **6. Side Panel Overview**<br>A tour of the intuitive Side Panel interface, giving you quick access to all agents and features at a glance.<br><br>_Your command center._ | <video src="extension/public/videos/Side Panel Overview.mp4" controls="controls" width="100%"></video> |
+| **7. Text-to-Speech (TTS)**<br>Advanced voice interaction capabilities. Nova can speak responses for a hands-free and accessible experience.<br><br>_Listen to Nova._ | <video src="extension/public/videos/TTS.mp4" controls="controls" width="100%"></video> |
+| **8. Tutorial & Settings**<br>Comprehensive settings to customize your agent's behavior and a guided tutorial to get you started quickly.<br><br>_Customize your experience._ | <video src="extension/public/videos/Tutorial & Settings.mp4" controls="controls" width="100%"></video> |
+| **9. Security & DOM Vision**<br>Includes a Security Firewall to block trackers and a Visual Accessibility Tree to "see" the web structure.<br> | ![Firewall](photos/Firewall.png)<br>![DOM Logic 2](photos/DOM%20Interaction2.png) |
+| **10. Analytics Dashboard**<br>Track your usage, tokens, and agent performance metrics in real-time.<br> | ![Analytics Dashboard](photos/Analytics_dashboard.png) |
 
 ---
 
@@ -78,6 +49,10 @@ Walkthrough on how to build and load the extension.
 ---
 
 ## 🚀 Quick Start Guide
+
+> **📹 Watch the Installation Guide:**
+>
+> <video src="extension/public/videos/How to install extension.mp4" controls="controls" width="100%"></video>
 
 **1. Clone the repository**
 ```bash
