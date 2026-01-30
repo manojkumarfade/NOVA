@@ -23,16 +23,16 @@ Explore Nova's capabilities through these powerful features.
 
 | Feature & Description | Visual Experience |
 | :--- | :--- |
-| **1. Agent Mode (The Brain)**<br>The core recursive reasoning loop. Visualizes the Planner -> Navigator -> Validator cycle and dynamic action execution.<br><br>_Watch how Nova thinks and acts._ | <video src="extension/public/videos/Agent Mode.mp4" controls="controls" width="100%"></video> |
-| **2. Shopping Agent**<br>Specialized for e-commerce. Performs cross-platform price comparison, spec extraction, and deal analysis.<br><br>_See Nova find the best deals._ | <video src="extension/public/videos/Shopping Agent.mp4" controls="controls" width="100%"></video> |
-| **3. Files Analyzer**<br>Intelligent file reading and analysis. Upload documents and let Nova parse, summarize, and explain them for you.<br><br>_Unlock insights from your files._ | <video src="extension/public/videos/Files Analyzer.mp4" controls="controls" width="100%"></video> |
-| **4. Web Search Agent**<br>Autonomous research assistant. Synthesizes fact-based answers from live web data, providing up-to-date information.<br><br>_Research made effortless._ | <video src="extension/public/videos/Web Search.mp4" controls="controls" width="100%"></video> |
-| **5. Image Generation**<br>Integrated diffusion models to synthesize assets directly from natural language prompts.<br><br>_Create visuals instantly._ | <video src="extension/public/videos/Image Generation.mp4" controls="controls" width="100%"></video> |
-| **6. Side Panel Overview**<br>A tour of the intuitive Side Panel interface, giving you quick access to all agents and features at a glance.<br><br>_Your command center._ | <video src="extension/public/videos/Side Panel Overview.mp4" controls="controls" width="100%"></video> |
-| **7. Text-to-Speech (TTS)**<br>Advanced voice interaction capabilities. Nova can speak responses for a hands-free and accessible experience.<br><br>_Listen to Nova._ | <video src="[extension/public/videos/TTS.mp4](https://github-production-user-asset-6210df.s3.amazonaws.com/216578676/542993155-40ae713b-38d6-49db-aef9-80d70d808e16.mp4?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20260130%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20260130T171341Z&X-Amz-Expires=300&X-Amz-Signature=8be0c57e8571cf0222cb869f76fcebd5565511f14ea8a7a4b100a7533abf5e2e&X-Amz-SignedHeaders=host)" controls="controls" width="100%"></video> |
-| **8. Tutorial & Settings**<br>Comprehensive settings to customize your agent's behavior and a guided tutorial to get you started quickly.<br><br>_Customize your experience._ | <video src="extension/public/videos/Tutorial & Settings.mp4" controls="controls" width="100%"></video> |
-| **9. Security & DOM Vision**<br>Includes a Security Firewall to block trackers and a Visual Accessibility Tree to "see" the web structure.<br> | ![Firewall](photos/Firewall.png)<br>![DOM Logic 2](photos/DOM%20Interaction2.png) |
-| **10. Analytics Dashboard**<br>Track your usage, tokens, and agent performance metrics in real-time.<br> | ![Analytics Dashboard](photos/Analytics_dashboard.png) |
+| **1. Agent Mode (The Brain)**<br>The core recursive reasoning loop. Visualizes the Planner -> Navigator -> Validator cycle and dynamic action execution.<br><br>_Watch how Nova thinks and acts._ | <video src="extension/public/videos/Agent%20Mode.mp4" controls="controls" width="100%"></video><br><br>![Agent Mode](photos/Agentic%20mode.png)<br>![Agent Mode 2](photos/Agentic%20mode2.png) |
+| **2. Shopping Agent**<br>Specialized for e-commerce. Performs cross-platform price comparison, spec extraction, and deal analysis.<br><br>_See Nova find the best deals._ | <video src="extension/public/videos/Shopping%20Agent.mp4" controls="controls" width="100%"></video><br><br>![Shopping Agent](photos/Shopping%20Agent.png)<br>![Shopping Agent 2](photos/Shopping2.png) |
+| **3. Files Analyzer**<br>Intelligent file reading and analysis. Upload documents and let Nova parse, summarize, and explain them for you.<br><br>_Unlock insights from your files._ | <video src="extension/public/videos/Files%20Analyzer.mp4" controls="controls" width="100%"></video> |
+| **4. Web Search Agent**<br>Autonomous research assistant. Synthesizes fact-based answers from live web data, providing up-to-date information.<br><br>_Research made effortless._ | <video src="extension/public/videos/Web%20Search.mp4" controls="controls" width="100%"></video><br><br>![Web Search](photos/Web_search.png)<br>![Web Search 2](photos/Web_search2.png) |
+| **5. Image Generation**<br>Integrated diffusion models to synthesize assets directly from natural language prompts.<br><br>_Create visuals instantly._ | <video src="extension/public/videos/Image%20Generation.mp4" controls="controls" width="100%"></video><br><br>![Image Gen](photos/Image_gen.png)<br>![Image Gen 2](photos/Image_gen2.png) |
+| **6. Side Panel Overview**<br>A tour of the intuitive Side Panel interface, giving you quick access to all agents and features at a glance.<br><br>_Your command center._ | <video src="extension/public/videos/Side%20Panel%20Overview.mp4" controls="controls" width="100%"></video><br><br>![Extension Overview](photos/Extension_overview.png) |
+| **7. Text-to-Speech (TTS) & Chat**<br>Advanced voice interaction and history.<br><br>_Listen to Nova speak._ | <video src="extension/public/videos/TTS.mp4" controls="controls" width="100%"></video><br><br>![Chat History](photos/Chat_history.png) |
+| **8. Tutorial, Settings & Support**<br>Comprehensive settings and support.<br><br>_Customize your experience._ | <video src="extension/public/videos/Tutorial%20&%20Settings.mp4" controls="controls" width="100%"></video><br><br>![Support](photos/Support.png)<br>![Live Chat](photos/Live_chat.png) |
+| **9. Security & DOM Vision**<br>Includes a Security Firewall to block trackers and a Visual Accessibility Tree to "see" the web structure.<br> | ![Firewall](photos/Firewall.png)<br>![DOM Interaction](photos/DOM%20Interaction.png)<br>![DOM Logic 2](photos/DOM%20Interaction2.png)<br>![DOM With Image](photos/Dom%20with%20image.png) |
+| **10. Analytics Dashboard**<br>Track your usage, tokens, and agent performance metrics in real-time.<br> | ![Analytics](photos/Analytics.png)<br>![Analytics Dashboard](photos/Analytics_dashboard.png) |
 
 ---
 
@@ -52,7 +52,7 @@ Explore Nova's capabilities through these powerful features.
 
 > **📹 Watch the Installation Guide:**
 >
-> <video src="extension/public/videos/How to install extension.mp4" controls="controls" width="100%"></video>
+> <video src="extension/public/videos/How%20to%20install%20extension.mp4" controls="controls" width="100%"></video>
 
 **1. Clone the repository**
 ```bash
