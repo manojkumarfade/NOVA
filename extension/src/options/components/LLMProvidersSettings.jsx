@@ -1,3 +1,11 @@
+/**
+ * @file LLMProvidersSettings.jsx
+ * @description Core functionality for LLMProvidersSettings.
+ * Handles the primary logic and responsibilities designated for this module.
+ * 
+ * @context Options UI Component (React)
+ */
+
 import React, { useState, useEffect } from 'react';
 import Icon from '../../shared/components/AppIcon';
 import Button from '../../shared/components/ui/Button';
@@ -16,25 +24,17 @@ const LLMProvidersSettings = () => {
 
   const defaultProviders = [
     {
-      id: 'openai',
-      name: 'OpenAI',
-      icon: 'Sparkles',
-      apiKey: '',
-      isConnected: false,
-      isEnabled: true,
-      endpoint: 'https://api.openai.com/v1/chat/completions',
-      models: ['GPT-4 Turbo', 'GPT-4', 'GPT-3.5 Turbo']
-    },
-    {
       id: 'typegpt',
       name: 'TypeGPT',
       icon: 'Cpu',
-      apiKey: '', // stored separately
+      apiKey: '',
       isConnected: false,
-      isEnabled: true, // Default enabled as requested
+      isEnabled: true,
       endpoint: 'https://api.typegpt.net/v1/chat/completions',
+      docsUrl: 'https://api.typegpt.net',
       models: [
         'zai-org/GLM-4.6',
+        'deepseek-ai/DeepSeek-R1-0528',
         'Qwen/Qwen3-235B-A22B-Thinking-2507',
         'Qwen/Qwen3-235B-A22B-Instruct-2507',
         'moonshotai/kimi-k2-instruct-0905',
@@ -44,13 +44,34 @@ const LLMProvidersSettings = () => {
         'deepseek-ai/deepseek-r1',
         'deepseek-ai/deepseek-r1-0528',
         'openai/gpt-oss-120b',
+        'openai/gpt-oss-20b',
         'mistralai/mistral-large-3-675b-instruct-2512',
         'deepseek-ai/deepseek-v3.1-terminus',
+        'deepseek-ai/deepseek-v3.1',
+        'mistralai/mistral-large',
         'mistralai/mistral-small-24b-instruct',
         'mistralai/magistral-small-2506',
+        'mistralai/mistral-small-3.1-24b-instruct-2503',
         'mistralai/ministral-14b-instruct-2512',
         'qwen/qwen3-next-80b-a3b-thinking',
         'qwen/qwen3-next-80b-a3b-instruct'
+      ]
+    },
+    {
+      id: 'openai',
+      name: 'OpenAI',
+      icon: 'Sparkles',
+      apiKey: '',
+      isConnected: false,
+      isEnabled: true,
+      endpoint: 'https://api.openai.com/v1/chat/completions',
+      docsUrl: 'https://platform.openai.com/api-keys',
+      models: [
+        'gpt-5.2-pro', 'gpt-5.1', 'o3-pro', 'o1-preview',
+        'gpt-5', 'gpt-4.1-mini', 'gpt-4o', 'gpt-4-turbo-2024-04-09',
+        'gpt-4-0613', 'gpt-4-32k-0613',
+        'gpt-3.5-turbo-0125', 'gpt-3.5-turbo-instruct',
+        'davinci-002', 'babbage-002'
       ]
     },
     {
@@ -59,26 +80,47 @@ const LLMProvidersSettings = () => {
       icon: 'Zap',
       apiKey: '',
       isConnected: false,
-      isEnabled: false,
-      models: ['Claude 3 Opus', 'Claude 3 Sonnet', 'Claude 3 Haiku']
+      isEnabled: true,
+      endpoint: 'https://api.anthropic.com/v1/messages',
+      docsUrl: 'https://console.anthropic.com/settings/keys',
+      models: [
+        'claude-opus-4.6', 'claude-sonnet-4.5', 'claude-haiku-4.5',
+        'claude-3-7-sonnet-20250219', 'claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-3-5-sonnet-20240620',
+        'claude-2.0', 'claude-2.1',
+        'claude-1.0', 'claude-instant-1.2'
+      ]
     },
     {
       id: 'google',
-      name: 'Google AI',
+      name: 'Google Gemini',
       icon: 'Gem',
       apiKey: '',
       isConnected: false,
-      isEnabled: false,
-      models: ['Gemini Pro', 'Gemini Ultra']
+      isEnabled: true,
+      endpoint: 'https://generativelanguage.googleapis.com/v1beta/models',
+      docsUrl: 'https://aistudio.google.com/apikey',
+      models: [
+        'gemini-3-pro', 'gemini-3-flash', 'gemini-2.5-pro', 'gemini-2.5-flash',
+        'gemini-2.0-flash-001', 'gemini-2.0-flash-lite',
+        'gemini-1.5-pro-001', 'gemini-1.5-flash-001', 'gemini-1.5-pro', 'gemini-1.5-flash',
+        'gemini-1.0-pro'
+      ]
     },
     {
-      id: 'deepseek',
-      name: 'DeepSeek',
-      icon: 'Brain',
+      id: 'xai',
+      name: 'xAI (Grok)',
+      icon: 'X',
       apiKey: '',
       isConnected: false,
-      isEnabled: false,
-      models: ['DeepSeek Chat', 'DeepSeek Coder']
+      isEnabled: true,
+      endpoint: 'https://api.x.ai/v1/chat/completions',
+      docsUrl: 'https://console.x.ai/',
+      models: [
+        'grok-4.1', 'grok-4', 'grok-4-fast-reasoning',
+        'grok-2-vision-1212', 'grok-vision-beta',
+        'grok-3', 'grok-3-mini-beta',
+        'grok-2-1212', 'grok-1.5', 'grok-beta'
+      ]
     }
   ];
 
@@ -137,39 +179,33 @@ const LLMProvidersSettings = () => {
 
     try {
       if (providerId === 'typegpt') {
-        // Specific TypeGPT Test - Prefer fast /models check
         try {
-          const response = await fetch("https://api.typegpt.net/v1/models", {
-            method: "GET",
+          console.log("Testing TypeGPT chat completion directly...");
+          const chatResponse = await fetch("https://api.typegpt.net/v1/chat/completions", {
+            method: "POST",
             headers: {
-              "Authorization": `Bearer ${provider.apiKey}`
-            }
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${provider.apiKey.replace(/^Bearer\s+/i, '').trim()}`
+            },
+            body: JSON.stringify({
+              model: "openai/gpt-oss-120b",
+              messages: [{ role: "user", content: "Tell a joke" }]
+            })
           });
-          if (response.ok) {
+          if (chatResponse.ok) {
             success = true;
           } else {
-            // Fallback to chat completion if models endpoint is restricted
-            console.warn("TypeGPT models check failed, trying chat completion...");
-            const chatResponse = await fetch("https://api.typegpt.net/v1/chat/completions", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${provider.apiKey}`
-              },
-              body: JSON.stringify({
-                model: provider.models[0] || "deepseek-ai/deepseek-r1", // Use the first available model
-                messages: [{ role: "user", content: "Hi" }],
-                max_tokens: 5 // Save tokens
-              })
-            });
-            if (chatResponse.ok) success = true;
+            const errorText = await chatResponse.text();
+            console.error(`TypeGPT test returned ${chatResponse.status}:`, errorText);
+            // Alert user so they can see the exact error
+            alert(`TypeGPT Connection Failed!\nStatus: ${chatResponse.status}\nResponse: ${errorText}`);
           }
         } catch (err) {
           console.error("TypeGPT Test Error:", err);
+          alert(`TypeGPT Test Network Error: ${err.message}`);
         }
       } else {
-        // Mock test for others (or implement real if URLs known)
-        // Ideally we'd hit https://api.openai.com/v1/models for OpenAI
+        // Mock test for others
         await new Promise(r => setTimeout(r, 1000));
         if (provider.apiKey.length > 10) success = true;
       }
@@ -239,6 +275,79 @@ const LLMProvidersSettings = () => {
         </div>
       </div>
 
+      {/* How to Get Free API Keys Section */}
+      <div className="bg-gradient-to-r from-primary/5 to-secondary/5 border border-primary/20 rounded-lg p-4 md:p-6">
+        <div className="flex items-start gap-3">
+          <Icon name="Key" size={22} className="text-primary flex-shrink-0 mt-0.5" />
+          <div className="space-y-3 flex-1">
+            <p className="text-sm font-heading font-semibold text-foreground">
+              🔑 How to Get Free API Keys
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Nova is <strong>100% free & open source</strong>. You just need an API key from any of these providers. Many offer generous free tiers!
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <a href="https://infip.pro/" target="_blank" rel="noreferrer" className="flex items-center gap-2 px-3 py-2 bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-lg transition-all cursor-pointer group">
+                <Icon name="ExternalLink" size={14} className="text-primary" />
+                <div>
+                  <span className="text-xs font-semibold text-primary group-hover:underline">Infip.pro</span>
+                  <span className="block text-[10px] text-muted-foreground">Free API keys with generous rate limits</span>
+                </div>
+              </a>
+              <a href="https://www.a4f.co/models" target="_blank" rel="noreferrer" className="flex items-center gap-2 px-3 py-2 bg-secondary/10 hover:bg-secondary/20 border border-secondary/20 rounded-lg transition-all cursor-pointer group">
+                <Icon name="ExternalLink" size={14} className="text-secondary" />
+                <div>
+                  <span className="text-xs font-semibold text-secondary group-hover:underline">A4F.co Models</span>
+                  <span className="block text-[10px] text-muted-foreground">Free AI models & image generation API</span>
+                </div>
+              </a>
+              <a href="https://platform.openai.com/api-keys" target="_blank" rel="noreferrer" className="flex items-center gap-2 px-3 py-2 bg-muted hover:bg-muted/80 border border-border rounded-lg transition-all cursor-pointer group">
+                <Icon name="ExternalLink" size={14} className="text-muted-foreground" />
+                <div>
+                  <span className="text-xs font-semibold text-foreground group-hover:underline">OpenAI Platform</span>
+                  <span className="block text-[10px] text-muted-foreground">GPT-4o, GPT-5, o3-pro</span>
+                </div>
+              </a>
+              <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noreferrer" className="flex items-center gap-2 px-3 py-2 bg-muted hover:bg-muted/80 border border-border rounded-lg transition-all cursor-pointer group">
+                <Icon name="ExternalLink" size={14} className="text-muted-foreground" />
+                <div>
+                  <span className="text-xs font-semibold text-foreground group-hover:underline">Anthropic Console</span>
+                  <span className="block text-[10px] text-muted-foreground">Claude Opus, Sonnet, Haiku</span>
+                </div>
+              </a>
+              <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" className="flex items-center gap-2 px-3 py-2 bg-muted hover:bg-muted/80 border border-border rounded-lg transition-all cursor-pointer group">
+                <Icon name="ExternalLink" size={14} className="text-muted-foreground" />
+                <div>
+                  <span className="text-xs font-semibold text-foreground group-hover:underline">Google AI Studio</span>
+                  <span className="block text-[10px] text-muted-foreground">Gemini Pro, Flash (free tier available)</span>
+                </div>
+              </a>
+              <a href="https://console.x.ai/" target="_blank" rel="noreferrer" className="flex items-center gap-2 px-3 py-2 bg-muted hover:bg-muted/80 border border-border rounded-lg transition-all cursor-pointer group">
+                <Icon name="ExternalLink" size={14} className="text-muted-foreground" />
+                <div>
+                  <span className="text-xs font-semibold text-foreground group-hover:underline">xAI Console</span>
+                  <span className="block text-[10px] text-muted-foreground">Grok 4, Grok Vision</span>
+                </div>
+              </a>
+              <a href="https://api.deepseek.com/" target="_blank" rel="noreferrer" className="flex items-center gap-2 px-3 py-2 bg-muted hover:bg-muted/80 border border-border rounded-lg transition-all cursor-pointer group">
+                <Icon name="ExternalLink" size={14} className="text-muted-foreground" />
+                <div>
+                  <span className="text-xs font-semibold text-foreground group-hover:underline">DeepSeek API</span>
+                  <span className="block text-[10px] text-muted-foreground">DeepSeek R1, V3 (affordable rates)</span>
+                </div>
+              </a>
+              <a href="https://api.typegpt.net" target="_blank" rel="noreferrer" className="flex items-center gap-2 px-3 py-2 bg-muted hover:bg-muted/80 border border-border rounded-lg transition-all cursor-pointer group">
+                <Icon name="ExternalLink" size={14} className="text-muted-foreground" />
+                <div>
+                  <span className="text-xs font-semibold text-foreground group-hover:underline">TypeGPT API</span>
+                  <span className="block text-[10px] text-muted-foreground">Free access to 20+ models</span>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Provider List */}
       <div className="grid grid-cols-1 gap-4 md:gap-6">
         {providers.map((provider) => (
@@ -274,9 +383,20 @@ const LLMProvidersSettings = () => {
                       </div>
                     )}
                   </div>
-                  <p className="text-xs md:text-sm text-muted-foreground mb-3">
+                  <p className="text-xs md:text-sm text-muted-foreground mb-1">
                     Available models: {provider.models.length > 5 ? provider.models.slice(0, 5).join(', ') + '...' : provider.models.join(', ')}
                   </p>
+                  {provider.docsUrl && (
+                    <a
+                      href={provider.docsUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-[11px] text-primary hover:underline mb-2"
+                    >
+                      <Icon name="ExternalLink" size={11} />
+                      Get API Key →
+                    </a>
+                  )}
 
                   <div className="space-y-3">
                     <Checkbox
@@ -352,6 +472,8 @@ const LLMProvidersSettings = () => {
         ))}
       </div>
 
+
+
       {/* Add Provider Section */}
       <div className="bg-card border border-border rounded-lg p-4 md:p-6 elevation-sm">
         {isAddingProvider ? (
@@ -424,8 +546,7 @@ const LLMProvidersSettings = () => {
         )}
       </div>
 
-      {/* Save Actions */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-4 border-t border-border mt-6">
         <Button
           variant="default"
           iconName="Save"
@@ -437,12 +558,29 @@ const LLMProvidersSettings = () => {
           {saveStatus === 'saved' ? 'Saved Successfully' : 'Save Changes'}
         </Button>
 
+        <Button
+          variant="outline"
+          onClick={async () => {
+            if (confirm("Reset all provider settings to default? This will clear your API keys.")) {
+              await StorageService.set('llm_providers', null);
+              window.location.reload();
+            }
+          }}
+          className="text-red-400 hover:text-red-300 border-red-900/30 hover:bg-red-900/10"
+        >
+          Reset Defaults
+        </Button>
+
         {saveStatus === 'saved' && (
           <div className="flex items-center gap-2 text-accent text-sm font-caption">
             <Icon name="CheckCircle2" size={16} />
             <span>Provider settings saved</span>
           </div>
         )}
+
+        <div className="flex-1 text-right text-[10px] text-gray-600 font-mono">
+          Nova v1.1.0
+        </div>
       </div>
     </div>
   );

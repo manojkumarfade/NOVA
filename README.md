@@ -1,6 +1,7 @@
 # Nova Browser Agent (AgenticBrowser)
 
 [![Chrome Web Store](https://img.shields.io/badge/Chrome_Web_Store-Coming_Soon-blue?style=for-the-badge&logo=google-chrome&logoColor=white)](https://github.com/manojkumarfade/NOVA)
+[![License](https://img.shields.io/badge/License-Open_Source-green?style=for-the-badge)](https://github.com/manojkumarfade/NOVA)
 
 > **The Advanced AI-Powered Chrome Extension**
 > *Verified by Manoj Kumar. Powered by Nova Intelligence.*
@@ -9,11 +10,28 @@
 
 ## 📖 Overview
 
-**Nova** is an **Agentic execution engine** living inside your browser. Not just a chatbot, Nova uses the **Chrome Debugger Protocol (CDP)** to actively drive the browser—clicking, scrolling, typing, and navigating like a human. 
+<img src="photos/Overview.png" width="100%">
 
-| **Ownership** | **Privacy Model** | **Security** |
-| :--- | :--- | :--- |
-| **Manoj Kumar** | **Local-First** (Data on your machine) | **AES-256 Encrypted** Keys |
+**Nova** is an **Agentic Execution Engine** living inside your browser. Not just a chatbot — Nova uses the **Chrome Debugger Protocol (CDP)** to actively drive the browser — clicking, scrolling, typing, and navigating like a human.
+
+| **Ownership** | **Privacy Model** | **Security** | **Cost** |
+| :--- | :--- | :--- | :--- |
+| **Manoj Kumar** | **Local-First** (Data on your machine) | **AES-256 Encrypted** Keys | **100% Free & Open Source** |
+
+---
+
+## 🆕 What's New in v2.0
+
+| Feature | Description |
+| :--- | :--- |
+| 🎙️ **Voice Agent** | Separate Voice Agent button (top bar) + Mic button (chat input) for voice dictation |
+| 🎵 **Song Detection** | Identify songs through lyrics (voice search) |
+| 🛍️ **Shopping v2** | Compare prices + Add to Cart + View Product + Flash.co comparison |
+| 🎨 **Vision Image Gen** | Generate images using current page as visual reference |
+| 📁 **File Upload** | Upload & analyze images, PDFs, DOCX, code files with Vision AI |
+| 🧠 **Reasoning Box** | See the AI's thinking process in real-time |
+| 🔑 **More LLM Providers** | 50+ models: TypeGPT, OpenAI, Anthropic, Gemini, Grok, DeepSeek |
+| ✨ **Updated UI** | Premium glassmorphism design with smooth animations |
 
 ---
 
@@ -31,7 +49,7 @@ Explore Nova's capabilities through these powerful features.
   <tr>
     <td valign="top">
       <h3>🧠 Agent Mode (The Brain)</h3>
-      <p>Experience the core recursive reasoning loop in action. Nova decomposes complex user requests into executable steps using its <b>Planner</b>, executes them via the <b>Navigator</b>, and self-corrects using the <b>Validator</b>.</p>
+      <p>Experience the core recursive reasoning loop in action. Nova decomposes complex user requests into executable steps using its <b>Planner</b>, executes them via the <b>Navigator</b>, and self-corrects using the <b>Recovery Engine</b>.</p>
       <p><i>Watch as it dynamically interacts with the browser, handling errors and refining its approach in real-time.</i></p>
     </td>
     <td>
@@ -41,26 +59,65 @@ Explore Nova's capabilities through these powerful features.
     </td>
   </tr>
 
-  <!-- 2. Shopping Agent -->
+  <!-- 2. Shopping Agent (Updated) -->
   <tr>
     <td valign="top">
-      <h3>🛍️ Shopping Agent</h3>
-      <p>Your personal e-commerce assistant. Nova autonomously navigates multiple online stores (like Amazon, Flipkart), extracts detailed product specifications, compares prices across platforms, and presents a comprehensive deal analysis so you never overpay.</p>
-      <p><i>See Nova find the best deals.</i></p>
+      <h3>🛍️ Shopping Agent v2</h3>
+      <p>Your personal e-commerce assistant. Nova searches <b>9-10 websites</b> simultaneously using Tavily & DuckDuckGo, compares prices across platforms, and presents the best deals.</p>
+      <p><b>🆕 New Actions:</b></p>
+      <ul>
+        <li>🛒 <b>Add to Cart</b> — Auto-navigate & add items</li>
+        <li>🔗 <b>View Product</b> — Direct product links</li>
+        <li>⚡ <b>Compare on Flash.co</b> — Deep comparison</li>
+      </ul>
     </td>
     <td>
       <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Shopping%20Agent.mp4" controls="controls" width="100%"></video>
       <br><br>
       <img src="photos/Shopping%20Agent.png" width="48%"> <img src="photos/Shopping2.png" width="48%">
+      <br><br>
+      <img src="photos/shopping%203.png" width="100%">
     </td>
   </tr>
 
-  <!-- 3. Files Analyzer -->
+  <!-- 3. Voice Agent (NEW) -->
+  <tr>
+    <td valign="top">
+      <h3>🎙️ Voice Agent (NEW)</h3>
+      <p>Talk to Nova in <b>any language</b>! Two separate voice modes for maximum flexibility:</p>
+      <p><b>🎤 Mic Button</b> (chat input bar) — Simple voice-to-text dictation. Click to start, click again to stop.</p>
+      <p><b>🎙️ Voice Agent</b> (top bar, next to model selector) — Full voice assistant overlay with TTS, barge-in, Song Detection, and multilingual conversations.</p>
+      <p><b>Supports:</b> Hindi, Telugu, English, Spanish, French, German & more</p>
+    </td>
+    <td>
+      <img src="photos/Voice%20agent.png" width="100%">
+    </td>
+  </tr>
+
+  <!-- 4. Song Detection (NEW) -->
+  <tr>
+    <td valign="top">
+      <h3>🎵 Song Detection (NEW)</h3>
+      <p>Identify songs through <b>lyrics</b>! Sing or speak lyrics and Nova will search the web to find the matching song.</p>
+      <p><b>How it works:</b></p>
+      <ul>
+        <li>🎤 Sing lyrics in <b>any language</b></li>
+        <li>🔍 Uses web search to identify songs</li>
+        <li>📝 Returns song name, artist & details</li>
+      </ul>
+      <p><i>⚠️ Note: Detects lyrics, not background music/instrumentals. Works great with voice singing!</i></p>
+    </td>
+    <td>
+      <img src="photos/Song_mode.png" width="100%">
+    </td>
+  </tr>
+
+  <!-- 5. Files Analyzer -->
   <tr>
     <td valign="top">
       <h3>📂 Files Analyzer</h3>
-      <p>Unlock insights from your local documents. Simply upload files (PDFs, Docs), and Nova's intelligent parsing engine will summarize contents, answer specific questions, and extract key data points, turning static files into interactive knowledge.</p>
-      <p><i>Unlock insights from your files.</i></p>
+      <p>Upload & analyze files with Vision AI. Supports <b>images (Vision AI sees them!), PDFs, DOCX, code files, CSV</b> and more.</p>
+      <p><i>Nova can actually read text in images, describe photos, and answer visual questions.</i></p>
     </td>
     <td>
       <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Files%20Analyzer.mp4" controls="controls" width="100%"></video>
@@ -69,12 +126,11 @@ Explore Nova's capabilities through these powerful features.
     </td>
   </tr>
 
-  <!-- 4. Web Search Agent -->
+  <!-- 6. Web Search Agent -->
   <tr>
     <td valign="top">
       <h3>🌐 Web Search Agent</h3>
-      <p>An autonomous research powerhouse. Nova browses the live web, reads multiple sources, filters out noise, and synthesizes fact-based answers with citations. It's like having a human researcher working for you at machine speed.</p>
-      <p><i>Research made effortless.</i></p>
+      <p>An autonomous research powerhouse. Opens <b>6 background tabs</b> simultaneously, reads full page content, and synthesizes fact-based answers with citations. Uses <b>Tavily Search</b> with DuckDuckGo fallback.</p>
     </td>
     <td>
       <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Web%20Search.mp4" controls="controls" width="100%"></video>
@@ -83,12 +139,12 @@ Explore Nova's capabilities through these powerful features.
     </td>
   </tr>
 
-  <!-- 5. Image Generation -->
+  <!-- 7. Image Generation -->
   <tr>
     <td valign="top">
-      <h3>🎨 Image Generation</h3>
-      <p>Bring ideas to life instantly. Using integrated diffusion models, Nova can generate high-quality visual assets directly within the browser based on your natural language prompts—perfect for designers, creators, and visual thinkers.</p>
-      <p><i>Create visuals instantly.</i></p>
+      <h3>🎨 Image Generation + Page Vision</h3>
+      <p>Generate images from text prompts. <b>🆕 Page Vision</b>: Say "use this page as reference" and Nova captures a screenshot of the current page to use as visual context for generation!</p>
+      <p><i>Perfect for designers using page layouts as inspiration.</i></p>
     </td>
     <td>
       <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Image%20Generation.mp4" controls="controls" width="100%"></video>
@@ -97,12 +153,11 @@ Explore Nova's capabilities through these powerful features.
     </td>
   </tr>
 
-  <!-- 6. Side Panel Overview -->
+  <!-- 8. Side Panel Overview -->
   <tr>
     <td valign="top">
       <h3>💻 Side Panel Overview</h3>
-      <p>Your command center, always a click away. The sleek Side Panel interface provides unified access to all agents and tools without cluttering your browsing experience. Manage tasks, view history, and switch modes seamlessly.</p>
-      <p><i>Your command center.</i></p>
+      <p>Your command center, always a click away. The sleek Side Panel interface provides unified access to all agents and tools without cluttering your browsing experience.</p>
     </td>
     <td>
       <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Side%20Panel%20Overview.mp4" controls="controls" width="100%"></video>
@@ -111,12 +166,11 @@ Explore Nova's capabilities through these powerful features.
     </td>
   </tr>
 
-  <!-- 7. TTS & Chat -->
+  <!-- 9. TTS & Chat -->
   <tr>
     <td valign="top">
       <h3>🗣️ Text-to-Speech (TTS) & Chat</h3>
-      <p>Interact naturally with voice. Nova features advanced Text-to-Speech capabilities, allowing it to speak responses for a truly hands-free experience. Combined with a rich chat history, conversations feel fluid and accessible.</p>
-      <p><i>Listen to Nova speak.</i></p>
+      <p>Nova speaks responses with advanced Neural TTS. Combined with rich chat history, conversations feel fluid and accessible.</p>
     </td>
     <td>
       <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/TTS.mp4" controls="controls" width="100%"></video>
@@ -125,25 +179,11 @@ Explore Nova's capabilities through these powerful features.
     </td>
   </tr>
 
-  <!-- 8. Tutorial & Settings -->
-  <tr>
-    <td valign="top">
-      <h3>⚙️ Tutorial, Settings & Support</h3>
-      <p>Full control at your fingertips. Customize agent behavior, manage privacy settings, and access guided tutorials to master Nova's features. Built-in support ensures you're never left guessing.</p>
-      <p><i>Customize your experience.</i></p>
-    </td>
-    <td>
-      <video src="https://github.com/manojkumarfade/NOVA/raw/main/extension/public/videos/Tutorial%20&%20Settings.mp4" controls="controls" width="100%"></video>
-      <br><br>
-      <img src="photos/Support.png" width="48%"> <img src="photos/Live_chat.png" width="48%">
-    </td>
-  </tr>
-
-  <!-- 9. Security & DOM Vision -->
+  <!-- 10. Security & DOM Vision -->
   <tr>
     <td valign="top">
       <h3>🛡️ Security & DOM Vision</h3>
-      <p>See what Nova sees. The <b>Visual Accessibility Tree</b> maps the DOM for precise interaction, while the built-in <b>Security Firewall</b> proactively blocks trackers and malicious domains using <code>declarativeNetRequest</code>.</p>
+      <p>See what Nova sees. The <b>Visual Accessibility Tree</b> maps the DOM for precise interaction, while the built-in <b>Security Firewall</b> blocks trackers using <code>declarativeNetRequest</code>.</p>
     </td>
     <td>
       <img src="photos/Firewall.png" width="48%"> <img src="photos/DOM%20Interaction.png" width="48%">
@@ -152,11 +192,11 @@ Explore Nova's capabilities through these powerful features.
     </td>
   </tr>
 
-  <!-- 10. Analytics -->
+  <!-- 11. Analytics -->
   <tr>
     <td valign="top">
       <h3>📊 Analytics Dashboard</h3>
-      <p>Transparency first. Monitor real-time usage metrics, track token consumption, and analyze agent performance. Stay informed about costs and efficiency with detailed visualizations.</p>
+      <p>Monitor real-time usage metrics, track token consumption, and analyze agent performance with detailed visualizations.</p>
     </td>
     <td>
       <img src="photos/Analytics.png" width="48%"> <img src="photos/Analytics_dashboard.png" width="48%">
@@ -166,138 +206,24 @@ Explore Nova's capabilities through these powerful features.
 
 ---
 
-## 🎬 Comprehensive Video Demonstrations
+## 🔑 Getting Free API Keys
 
-Explore detailed walkthroughs of Nova's capabilities.
+Nova is **100% free & open source**. You just need an API key from any provider:
 
-<table width="100%">
-  <tr>
-    <th width="30%">Feature Details</th>
-    <th width="70%">Video Demonstration</th>
-  </tr>
-
-  <!-- 1. Agent Mode -->
-  <tr>
-    <td valign="top">
-        <h3>🧠 Agent Mode</h3>
-        <p><b>The Core Brain.</b> Watch Nova reason through tasks, plan steps, and execute complex browser interactions dynamically.</p>
-    </td>
-    <td>
-        <a href="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/Agent%20Mode.mp4">
-            <img src="https://img.shields.io/badge/📥_Download_/_Watch-Agent_Mode-blue?style=for-the-badge&logo=github" alt="Watch Agent Mode" />
-        </a>
-    </td>
-  </tr>
-
-  <!-- 2. Shopping Agent -->
-  <tr>
-    <td valign="top">
-        <h3>🛍️ Shopping Agent</h3>
-        <p><b>Smart Buying.</b> Demonstrating price comparison, specification extraction, and cross-platform deal finding.</p>
-    </td>
-    <td>
-        <a href="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/Shopping%20Agent.mp4">
-            <img src="https://img.shields.io/badge/📥_Download_/_Watch-Shopping_Agent-blue?style=for-the-badge&logo=github" alt="Watch Shopping Agent" />
-        </a>
-    </td>
-  </tr>
-
-  <!-- 3. Web Search Agent -->
-  <tr>
-    <td valign="top">
-        <h3>🌐 Web Search Agent</h3>
-        <p><b>Deep Research.</b> See how Nova browses the live web to synthesize answers from multiple sources.</p>
-    </td>
-    <td>
-        <a href="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/Web%20Search.mp4">
-            <img src="https://img.shields.io/badge/📥_Download_/_Watch-Web_Search_Agent-blue?style=for-the-badge&logo=github" alt="Watch Web Search" />
-        </a>
-    </td>
-  </tr>
-
-  <!-- 4. Files Analyzer -->
-  <tr>
-    <td valign="top">
-        <h3>📂 Files Analyzer</h3>
-        <p><b>Document Intelligence.</b> Analyzing local PDF/Doc files to extract insights and answer queries.</p>
-    </td>
-    <td>
-        <a href="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/Files%20Analyzer.mp4">
-            <img src="https://img.shields.io/badge/📥_Download_/_Watch-Files_Analyzer-blue?style=for-the-badge&logo=github" alt="Watch Files Analyzer" />
-        </a>
-    </td>
-  </tr>
-
-  <!-- 5. Image Generation -->
-  <tr>
-    <td valign="top">
-        <h3>🎨 Image Generation</h3>
-        <p><b>Creative Power.</b> Generating high-quality assets directly from natural language prompts.</p>
-    </td>
-    <td>
-        <a href="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/Image%20Generation.mp4">
-            <img src="https://img.shields.io/badge/📥_Download_/_Watch-Image_Generation-blue?style=for-the-badge&logo=github" alt="Watch Image Generation" />
-        </a>
-    </td>
-  </tr>
-
-  <!-- 6. Side Panel Overview -->
-  <tr>
-    <td valign="top">
-        <h3>💻 Side Panel Overview</h3>
-        <p><b>Unified Interface.</b> A tour of the sleek command center for managing all agents and settings.</p>
-    </td>
-    <td>
-        <a href="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/Side%20Panel%20Overview.mp4">
-            <img src="https://img.shields.io/badge/📥_Download_/_Watch-Side_Panel_Overview-blue?style=for-the-badge&logo=github" alt="Watch Side Panel Overview" />
-        </a>
-    </td>
-  </tr>
-
-  <!-- 7. Text-to-Speech -->
-  <tr>
-    <td valign="top">
-        <h3>🗣️ Text-to-Speech (TTS)</h3>
-        <p><b>Voice Interaction.</b> Demonstrating Nova's ability to speak responses for accessibility and ease of use.</p>
-    </td>
-    <td>
-        <a href="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/TTS.mp4">
-            <img src="https://img.shields.io/badge/📥_Download_/_Watch-TTS_&_Chat-blue?style=for-the-badge&logo=github" alt="Watch TTS" />
-        </a>
-    </td>
-  </tr>
-
-  <!-- 8. Tutorial & Settings -->
-  <tr>
-    <td valign="top">
-        <h3>⚙️ Tutorial & Settings</h3>
-        <p><b>Customization.</b> How to configure the agent and access built-in guides.</p>
-    </td>
-    <td>
-        <a href="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/Tutorial%20&%20Settings.mp4">
-            <img src="https://img.shields.io/badge/📥_Download_/_Watch-Tutorial_&_Settings-blue?style=for-the-badge&logo=github" alt="Watch Tutorial" />
-        </a>
-    </td>
-  </tr>
-
-  <!-- 9. Installation Guide -->
-  <tr>
-    <td valign="top">
-        <h3>🚀 Installation Guide</h3>
-        <p><b>Get Started.</b> Step-by-step walkthrough of installing the Nova extension.</p>
-    </td>
-    <td>
-        <a href="https://github.com/manojkumarfade/NOVA/raw/main/doc_videos/How%20to%20install%20extension.mp4">
-            <img src="https://img.shields.io/badge/📥_Download_/_Watch-Installation_Guide-blue?style=for-the-badge&logo=github" alt="Watch Installation Guide" />
-        </a>
-    </td>
-  </tr>
-
-</table>
+| Provider | Link | Free? |
+| :--- | :--- | :--- |
+| **Infip.pro** | [infip.pro](https://infip.pro/) | ✅ Free with generous limits |
+| **A4F.co** | [a4f.co/models](https://www.a4f.co/models) | ✅ Free models + image gen |
+| **TypeGPT** | [api.typegpt.net](https://api.typegpt.net) | ✅ 20+ free models |
+| **Google Gemini** | [aistudio.google.com](https://aistudio.google.com/apikey) | ✅ Free tier |
+| **OpenAI** | [platform.openai.com](https://platform.openai.com/api-keys) | 💲 Pay-as-you-go |
+| **Anthropic** | [console.anthropic.com](https://console.anthropic.com/settings/keys) | 💲 Pay-as-you-go |
+| **xAI (Grok)** | [console.x.ai](https://console.x.ai/) | 💲 Pay-as-you-go |
+| **DeepSeek** | [api.deepseek.com](https://api.deepseek.com/) | 💲 Affordable |
 
 ---
 
-## 🛠️ Tech Stack using Modern Standards
+## 🛠️ Tech Stack
 
 | Category | Technologies |
 | :--- | :--- |
@@ -305,7 +231,9 @@ Explore detailed walkthroughs of Nova's capabilities.
 | **Extension Runtime** | Manifest V3 (Service Worker based) |
 | **Browser Protocol** | Chrome Debugger Protocol (CDP) |
 | **State Management** | Zustand + Supabase (Auth) |
-| **AI Models** | GPT-4o, Claude 3.5 Sonnet, Gemini Flash 1.5 |
+| **AI Models** | 50+ models — GPT-5, Claude 4.6, Gemini 3, Grok 4, DeepSeek R1 |
+| **Search** | Tavily + DuckDuckGo fallback |
+| **Animation** | Framer Motion |
 
 ---
 
@@ -336,6 +264,10 @@ npm run build:extension
 1. Open `chrome://extensions`
 2. Enable **Developer Mode**
 3. Click **Load Unpacked** -> Select `extension/dist`
+
+**5. Get API Key**
+- Go to [infip.pro](https://infip.pro/) or [a4f.co](https://www.a4f.co/models) for free keys
+- Open Nova Settings → LLM Providers → Paste your key
 
 ---
 

@@ -6,7 +6,6 @@ import { enableDomOverlay, disableDomOverlay } from './domOverlay';
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.type === 'EXECUTE_DOM_ACTION') {
         console.log('Executing DOM Action:', request.action);
-        // TODO: Implement actual DOM manipulation
         sendResponse({ status: 'completed' });
     }
     else if (request.type === 'ENABLE_DOM_OVERLAY') {

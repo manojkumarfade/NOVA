@@ -5,39 +5,66 @@ import Icon from '../../shared/components/AppIcon';
 import { Checkbox } from '../../shared/components/ui/Checkbox';
 
 const PROVIDERS = {
+    openai: {
+        name: 'OpenAI (DALL-E)',
+        models: [
+            { id: 'gpt-image-1.5', name: 'GPT-Image 1.5 (Multimodal)' },
+            { id: 'dall-e-3', name: 'DALL-E 3' },
+            { id: 'dall-e-2', name: 'DALL-E 2' }
+        ],
+        defaultModel: 'gpt-image-1.5',
+        sizes: ['1024x1024']
+    },
+    google: {
+        name: 'Google (Imagen)',
+        models: [
+            { id: 'gemini-3-pro', name: 'Gemini 3 Pro (Vision)' },
+            { id: 'imagen-3.0-generate-001', name: 'Imagen 3' }
+        ],
+        defaultModel: 'gemini-3-pro',
+        sizes: ['1024x1024']
+    },
+    xai: {
+        name: 'xAI (Grok)',
+        models: [
+            { id: 'grok-4', name: 'Grok 4 (Vision)' },
+            { id: 'grok-2-image', name: 'Grok 2 Image' }
+        ],
+        defaultModel: 'grok-4',
+        sizes: ['1024x1024']
+    },
     a4f: {
-        name: 'A4F (Reliable)',
+        name: 'TypeGPT / A4F',
         models: [
             { id: 'provider-4/imagen-4', name: 'Imagen 4 (Default)' },
             { id: 'provider-4/imagen-3.5', name: 'Imagen 3.5' },
-            { id: 'provider-8/imagen-4', name: 'Imagen 4 (Alt)' },
-            { id: 'provider-4/sdxl-lite', name: 'SDXL Lite' },
+            { id: 'provider-4/flux-2-dev', name: 'Flux 2 Dev' },
+            { id: 'provider-4/flux-2-klein-9b', name: 'Flux 2 Klein 9B' },
+            { id: 'provider-4/flux-2-klein-4b', name: 'Flux 2 Klein 4B' },
             { id: 'provider-4/flux-schnell', name: 'Flux Schnell' },
             { id: 'provider-4/phoenix', name: 'Phoenix' },
-            { id: 'provider-8/firefrost', name: 'Firefrost' },
-            { id: 'provider-8/z-image', name: 'Z-Image' },
+            { id: 'provider-4/z-image-turbo', name: 'Z-Image Turbo' },
+            { id: 'provider-4/sdxl-lite', name: 'SDXL Lite' }
         ],
         defaultModel: 'provider-4/imagen-4',
         sizes: ['1024x1024', '512x512', '768x768']
     },
-    pico: {
-        name: 'PicoApps (50/mo)',
-        models: [{ id: 'default', name: 'Default' }],
-        defaultModel: 'default',
-        sizes: ['1024x1024']
-    },
     infip: {
-        name: 'Infip.pro (Flexible)',
+        name: 'Infip.pro',
         models: [
             { id: 'img4', name: 'Image 4 (Recommended)' },
+            { id: 'img3', name: 'Image 3' },
+            { id: 'z-image-turbo', name: 'Z-Image Turbo' },
+            { id: 'nano-banana', name: 'Nano Banana' },
+            { id: 'qwen', name: 'Qwen Image' },
+            { id: 'lucid-origin', name: 'Lucid Origin' },
+            { id: 'phoenix', name: 'Phoenix' },
             { id: 'flux-schnell', name: 'Flux Schnell' },
             { id: 'sdxl', name: 'SDXL' },
-            { id: 'nano-banana', name: 'Nano Banana' },
-            { id: 'z-image-turbo', name: 'Z-Image Turbo' },
-            { id: 'lucid-origin', name: 'Lucid Origin' },
+            { id: 'sdxl-lite', name: 'SDXL Lite' }
         ],
         defaultModel: 'img4',
-        sizes: ['1024x1024', '512x512', '768x1024', '1024x768']
+        sizes: ['1024x1024', '1792x1024', '1024x1792']
     }
 };
 
@@ -45,8 +72,10 @@ const ImageSettings = () => {
     const [enabled, setEnabled] = useState(false);
     const [activeProvider, setActiveProvider] = useState('a4f');
     const [settings, setSettings] = useState({
+        openai: { apiKey: '', model: 'dall-e-3', size: '1024x1024' },
+        google: { apiKey: '', model: 'imagen-3.0-generate-001', size: '1024x1024' },
+        xai: { apiKey: '', model: 'grok-2-image', size: '1024x1024' },
         a4f: { apiKey: '', model: PROVIDERS.a4f.defaultModel, size: '1024x1024' },
-        pico: { apiKey: '', model: PROVIDERS.pico.defaultModel, size: '1024x1024' },
         infip: { apiKey: '', model: PROVIDERS.infip.defaultModel, size: '1024x1024' }
     });
     const [showKeys, setShowKeys] = useState({});
@@ -61,18 +90,22 @@ const ImageSettings = () => {
             enabled: false,
             activeProvider: 'a4f',
             providers: {
+                openai: { apiKey: '', model: 'dall-e-3', size: '1024x1024' },
+                google: { apiKey: '', model: 'imagen-3.0-generate-001', size: '1024x1024' },
+                xai: { apiKey: '', model: 'grok-2-image', size: '1024x1024' },
                 a4f: { apiKey: '', model: PROVIDERS.a4f.defaultModel, size: '1024x1024' },
-                pico: { apiKey: '', model: PROVIDERS.pico.defaultModel, size: '1024x1024' },
                 infip: { apiKey: '', model: PROVIDERS.infip.defaultModel, size: '1024x1024' }
             }
         });
 
         setEnabled(data.enabled);
         setActiveProvider(data.activeProvider || 'a4f');
-        setSettings(data.providers || {
-            a4f: { apiKey: '', model: PROVIDERS.a4f.defaultModel, size: '1024x1024' },
-            pico: { apiKey: '', model: PROVIDERS.pico.defaultModel, size: '1024x1024' },
-            infip: { apiKey: '', model: PROVIDERS.infip.defaultModel, size: '1024x1024' }
+        setSettings({
+            openai: { apiKey: '', model: 'dall-e-3', size: '1024x1024', ...data.providers?.openai },
+            google: { apiKey: '', model: 'imagen-3.0-generate-001', size: '1024x1024', ...data.providers?.google },
+            xai: { apiKey: '', model: 'grok-2-image', size: '1024x1024', ...data.providers?.xai },
+            a4f: { ...data.providers?.a4f, model: data.providers?.a4f?.model || PROVIDERS.a4f.defaultModel },
+            infip: { ...data.providers?.infip, model: data.providers?.infip?.model || PROVIDERS.infip.defaultModel }
         });
     };
 
@@ -150,37 +183,25 @@ const ImageSettings = () => {
 
                     <div className="space-y-3">
                         {/* API Key */}
-                        {key !== 'pico' ? (
-                            <div>
-                                <label className="block text-xs font-medium mb-1">API Key</label>
-                                <div className="relative">
-                                    <input
-                                        type={showKeys[key] ? "text" : "password"}
-                                        value={settings[key]?.apiKey || ''}
-                                        onChange={(e) => updateProviderSetting(key, 'apiKey', e.target.value)}
-                                        placeholder={`Enter ${info.name} API Key`}
-                                        className="w-full px-3 py-2 pr-10 bg-background border border-border rounded-md text-sm focus:ring-1 focus:ring-ring focus:outline-none placeholder:text-muted-foreground/50"
-                                    />
-                                    <button
-                                        onClick={() => toggleKeyVisibility(key)}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                                    >
-                                        <Icon name={showKeys[key] ? "EyeOff" : "Eye"} size={16} />
-                                    </button>
-                                </div>
-                                <p className="text-[10px] text-muted-foreground mt-1">Stored locally in your browser.</p>
+                        <div>
+                            <label className="block text-xs font-medium mb-1">API Key</label>
+                            <div className="relative">
+                                <input
+                                    type={showKeys[key] ? "text" : "password"}
+                                    value={settings[key]?.apiKey || ''}
+                                    onChange={(e) => updateProviderSetting(key, 'apiKey', e.target.value)}
+                                    placeholder={`Enter ${info.name} API Key`}
+                                    className="w-full px-3 py-2 pr-10 bg-background border border-border rounded-md text-sm focus:ring-1 focus:ring-ring focus:outline-none placeholder:text-muted-foreground/50"
+                                />
+                                <button
+                                    onClick={() => toggleKeyVisibility(key)}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                >
+                                    <Icon name={showKeys[key] ? "EyeOff" : "Eye"} size={16} />
+                                </button>
                             </div>
-                        ) : (
-                            <div className="bg-primary/10 border border-primary/20 rounded-md p-3 flex items-center gap-3">
-                                <div className="p-2 bg-primary/20 rounded-full text-primary">
-                                    <Icon name="Zap" size={18} />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium text-primary">Ready to Generate</p>
-                                    <p className="text-xs text-muted-foreground">Free tier (50 images/mo). No API key needed.</p>
-                                </div>
-                            </div>
-                        )}
+                            <p className="text-[10px] text-muted-foreground mt-1">Stored locally in your browser.</p>
+                        </div>
 
                         {/* Model Selector */}
                         <div className="grid grid-cols-2 gap-4">
@@ -215,8 +236,11 @@ const ImageSettings = () => {
                 </div>
             ))}
 
-            <div className="pt-4 flex items-center justify-between">
-                <span className={`text-sm font-medium ${status.includes('success') ? 'text-green-500' : 'text-red-500'}`}>{status}</span>
+            <div className="pt-4 flex items-center justify-between border-t border-border mt-6">
+                <div className="flex items-center gap-4">
+                    <span className={`text-sm font-medium ${status.includes('success') ? 'text-green-500' : 'text-red-500'}`}>{status}</span>
+                    <span className="text-[10px] text-gray-600 font-mono">v1.1.0</span>
+                </div>
                 <Button onClick={saveSettings} variant="default" iconName="Save">
                     Save Changes
                 </Button>

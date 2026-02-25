@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '../AppIcon';
+import { Mic } from 'lucide-react';
 import Button from './Button';
 import { StorageService } from '../../../services/StorageService';
 
@@ -10,6 +11,7 @@ const ConversationSidebar = ({
   onSelectConversation,
   onNewConversation,
   onDeleteConversation,
+  onClearAll,
   className = ''
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -53,39 +55,47 @@ const ConversationSidebar = ({
 
   return (
     <>
-      <button
-        onClick={onToggle}
-        className="fixed top-20 left-4 z-[150] lg:hidden p-2 rounded-md bg-card border border-border elevation-md transition-base hover:bg-muted"
-        aria-label="Toggle conversation sidebar"
-      >
-        <Icon name={isOpen ? 'X' : 'MessageSquare'} size={20} />
-      </button>
       {isOpen && (
         <div
-          className="fixed inset-0 z-[140] bg-background lg:hidden"
+          className="fixed inset-0 z-[140] bg-black/60 backdrop-blur-sm transition-all"
           onClick={onToggle}
         />
       )}
       <aside className={`
-        fixed top-16 left-0 h-[calc(100vh-4rem)] w-80 z-[145]
-        bg-card border-r border-border
-        transition-transform duration-250 ease-out
+        fixed top-0 left-0 h-full w-80 z-[145]
+        bg-black/95 border-r border-neon-cyan/20
+        transition-transform duration-300 ease-in-out shadow-[10px_0_20px_rgba(0,0,0,0.5)]
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0
         ${className}
       `}>
-        <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between p-4 border-b border-border">
-            <h2 className="text-lg font-heading font-semibold text-foreground">
-              Conversations
-            </h2>
-            <Button
-              variant="ghost"
-              size="icon"
-              iconName="Plus"
-              onClick={onNewConversation}
-              className="h-8 w-8"
-            />
+        <div className="flex flex-col h-full bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-slate-900/40 to-transparent">
+          <div className="flex items-center justify-between p-5 border-b border-neon-cyan/10">
+            <div className="flex flex-col">
+              <h2 className="text-xl font-heading font-bold text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-white tracking-wider">
+                HISTORY
+              </h2>
+              <span className="text-[10px] font-mono text-neon-cyan/50 tracking-[0.2em] uppercase">Conversation Logs</span>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  if (window.confirm('WIPE ALL MEMORY? This action is permanent.')) {
+                    onClearAll();
+                  }
+                }}
+                className="p-1.5 rounded border border-red-500/30 text-red-400 hover:bg-red-500/10 hover:border-red-500/60 transition-all group"
+                title="Clear All History"
+              >
+                <Icon name="Trash2" size={16} className="group-hover:scale-110" />
+              </button>
+              <button
+                onClick={onToggle}
+                className="p-1.5 rounded border border-white/10 text-white/50 hover:text-white hover:border-white/30 transition-all"
+                title="Close"
+              >
+                <Icon name="X" size={18} />
+              </button>
+            </div>
           </div>
 
           <div className="p-4 border-b border-border">
@@ -134,7 +144,8 @@ const ConversationSidebar = ({
                       <h3 className="text-sm font-caption font-medium text-foreground line-clamp-1">
                         {conversation?.title}
                       </h3>
-                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                      <span className="text-xs text-muted-foreground whitespace-nowrap flex items-center gap-1">
+                        {conversation?.hasVoiceMessages && <Mic size={10} className="text-neon-cyan" title="Voice chat" />}
                         {formatTimestamp(conversation?.timestamp)}
                       </span>
                     </div>

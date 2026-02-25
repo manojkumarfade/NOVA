@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import Header from '../shared/components/ui/Header';
 import Icon from '../shared/components/AppIcon';
 import GeneralSettings from './components/GeneralSettings';
 import ModelsSettings from './components/ModelsSettings';
 import LLMProvidersSettings from './components/LLMProvidersSettings';
-// import VoiceSettings from './components/VoiceSettings'; // Removed
 import ImageSettings from './components/ImageSettings';
 import FirewallSettings from './components/FirewallSettings';
 import AnalyticsSettings from './components/AnalyticsSettings';
@@ -13,6 +11,8 @@ import { StorageService } from '../services/StorageService';
 
 const SettingsDashboard = () => {
   const [activeTab, setActiveTab] = useState('general');
+  const [theme, setTheme] = useState('dark');
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
 
   useEffect(() => {
     // Check for auto-actions (e.g. requesting mic permission)
@@ -22,22 +22,18 @@ const SettingsDashboard = () => {
         try {
           await navigator.mediaDevices.getUserMedia({ audio: true });
           alert("Microphone permission granted! You can now close this tab and use the side panel.");
-          // Optional: Close tab? window.close();
         } catch (err) {
           console.error("Mic Permission Failed:", err);
           alert("Permission denied. Please click the Lock icon in the address bar and allow Microphone access manually.");
         }
       };
-      // Short delay to ensure rendering
       setTimeout(requestMic, 500);
     }
 
-    // Load and apply theme globally
     const loadTheme = async () => {
-      const settings = await StorageService.get('general_settings');
-      const theme = settings?.theme || 'dark';
-      const isDark = theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-      if (isDark) {
+      const savedTheme = await StorageService.get('theme', 'dark');
+      setTheme(savedTheme);
+      if (savedTheme === 'dark') {
         document.documentElement.classList.add('dark');
       } else {
         document.documentElement.classList.remove('dark');
@@ -50,7 +46,6 @@ const SettingsDashboard = () => {
     { id: 'general', label: 'General', icon: 'Settings' },
     { id: 'models', label: 'Models', icon: 'Brain' },
     { id: 'providers', label: 'LLM Providers', icon: 'Plug' },
-    // { id: 'voice', label: 'Voice Assistant', icon: 'Mic' }, // Removed
     { id: 'image', label: 'Image Gen', icon: 'Palette' },
     { id: 'firewall', label: 'Firewall', icon: 'Shield' },
     { id: 'analytics', label: 'Analytics', icon: 'BarChart3' },
@@ -62,7 +57,6 @@ const SettingsDashboard = () => {
       case 'general': return <GeneralSettings />;
       case 'models': return <ModelsSettings />;
       case 'providers': return <LLMProvidersSettings />;
-      // case 'voice': return <VoiceSettings />; // Removed
       case 'image': return <ImageSettings />;
       case 'firewall': return <FirewallSettings />;
       case 'analytics': return <AnalyticsSettings />;
@@ -72,54 +66,87 @@ const SettingsDashboard = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden relative font-body text-foreground">
-      {/* Background Image */}
-      <div
-        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-90"
-        style={{ backgroundImage: `url(${chrome.runtime.getURL('settings_bg_final.png')})` }}
-      ></div>
-      {/* Subtle overlay for text readability, but keeping image very visible */}
-      <div className="absolute inset-0 z-0 bg-background/60"></div>
-
-      <div className="relative z-10 w-full h-full flex flex-col">
-        <Header />
-        <main className="flex-1 overflow-y-auto pt-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
-            <div className="mb-6 md:mb-8 text-center sm:text-left">
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan via-white to-neon-violet mb-2 drop-shadow-[0_0_10px_rgba(6,182,212,0.5)]">
-                SYSTEM CONFIGURATION
-              </h1>
-              <p className="text-sm md:text-base text-neon-cyan/70 font-mono tracking-widest uppercase">
-                Adjust Neural Parameters & Protocols
-              </p>
+    <div className={`min-h-screen font-body transition-colors duration-300 ${theme === 'dark' ? 'bg-[#0a0a0c] text-slate-200' : 'bg-slate-50 text-slate-800'}`}>
+      <div className="flex h-screen overflow-hidden">
+        {/* Sidebar */}
+        <aside
+          className={`
+                        flex flex-col border-r transition-all duration-300 ease-in-out z-20
+                        ${theme === 'dark' ? 'bg-[#0f0f12] border-white/5' : 'bg-white border-slate-200'}
+                        ${sidebarExpanded ? 'w-64' : 'w-20'}
+                    `}
+        >
+          <div className="p-6 flex items-center gap-3">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br from-neon-cyan to-neon-violet shadow-lg flex-none`}>
+              <Icon name="Nova" size={20} className="text-white" />
             </div>
+            {sidebarExpanded && (
+              <h1 className="font-heading font-bold text-xl tracking-tighter truncate">
+                NOVA <span className="text-xs font-mono text-neon-cyan/60 ml-1">v0.9</span>
+              </h1>
+            )}
+          </div>
 
-            <div className="rounded-xl overflow-hidden shadow-[0_0_30px_rgba(6,182,212,0.15)] border border-neon-cyan/20 backdrop-blur-sm bg-black/30">
-              <div className="border-b border-neon-cyan/20 overflow-x-auto bg-transparent">
-                <nav className="flex min-w-max lg:min-w-0 p-1" aria-label="Settings tabs">
-                  {tabs?.map((tab) => (
-                    <button
-                      key={tab?.id}
-                      onClick={() => setActiveTab(tab?.id)}
-                      className={`
-                          flex items-center gap-2 px-4 md:px-6 py-3 md:py-4 text-sm md:text-base font-caption font-medium
-                          transition-all whitespace-nowrap flex-shrink-0 rounded-lg margin-1
-                          ${activeTab === tab?.id
-                          ? 'bg-neon-cyan/10 text-neon-cyan shadow-[0_0_10px_rgba(6,182,212,0.2)] border border-neon-cyan/30'
-                          : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
-                        }
-                        `}
-                    >
-                      <Icon name={tab?.icon} size={18} className={activeTab === tab?.id ? "animate-pulse" : ""} />
-                      <span className="hidden sm:inline font-mono uppercase tracking-wide">{tab?.label}</span>
-                    </button>
-                  ))}
-                </nav>
-              </div>
+          <nav className="flex-1 px-3 space-y-1 overflow-y-auto no-scrollbar py-4">
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`
+                                        w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all group relative
+                                        ${isActive
+                      ? (theme === 'dark' ? 'bg-neon-cyan/10 text-neon-cyan' : 'bg-blue-50 text-blue-600')
+                      : (theme === 'dark' ? 'text-slate-400 hover:bg-white/5 hover:text-slate-200' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800')
+                    }
+                                    `}
+                >
+                  <Icon
+                    name={tab.icon}
+                    size={20}
+                    className={`flex-none transition-transform group-hover:scale-110 ${isActive ? 'scale-110' : ''}`}
+                  />
+                  {sidebarExpanded && (
+                    <span className="font-medium text-[110%] whitespace-nowrap">{tab.label}</span>
+                  )}
+                  {isActive && (
+                    <div className={`absolute left-0 w-1 h-6 rounded-r-full bg-current`} />
+                  )}
+                </button>
+              );
+            })}
+          </nav>
 
-              <div className="p-4 md:p-6 lg:p-8 bg-black/10">
-                {renderTabContent()}
-              </div>
+          <div className="p-4 border-t border-white/5">
+            <button
+              onClick={() => setSidebarExpanded(!sidebarExpanded)}
+              className={`
+                                w-full flex items-center gap-3 px-3 py-2 rounded-lg 
+                                ${theme === 'dark' ? 'text-slate-500 hover:text-slate-300 hover:bg-white/5' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'}
+                                transition-all
+                            `}
+            >
+              <Icon name={sidebarExpanded ? "ChevronLeft" : "ChevronRight"} size={20} className="flex-none" />
+              {sidebarExpanded && <span className="text-sm">Collapse Menu</span>}
+            </button>
+          </div>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto relative bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-slate-900/40 to-transparent">
+          <div className="max-w-4xl mx-auto p-8 md:p-12 mb-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <header className="mb-10">
+              <h2 className="text-4xl font-heading font-extrabold tracking-tight mb-2">
+                {tabs.find(t => t.id === activeTab)?.label}
+              </h2>
+              <p className={`text-lg ${theme === 'dark' ? 'text-slate-400' : 'text-slate-500'}`}>
+                Customize your {tabs.find(t => t.id === activeTab)?.label.toLowerCase()} preferences and experience.
+              </p>
+            </header>
+
+            <div className="text-[110%] leading-relaxed">
+              {renderTabContent()}
             </div>
           </div>
         </main>

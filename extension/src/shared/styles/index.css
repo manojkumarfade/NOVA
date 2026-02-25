@@ -82,11 +82,49 @@
 html,
 body,
 #root {
-  height: 100%;
+  height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
+  /* Prevent body scroll, let React app handle it */
   font-family: 'Iceland', 'Orbitron', sans-serif;
+  font-size: 15px;
+  /* Bumped from browser default 16→15 for sidepanel */
   color: var(--color-foreground);
   background-color: var(--color-background);
+}
+
+/* Global text size overrides for readability */
+.prose {
+  font-size: 15px !important;
+  line-height: 1.65 !important;
+}
+
+.prose p,
+.prose li,
+.prose td {
+  font-size: 15px !important;
+}
+
+.prose h1 {
+  font-size: 1.5em !important;
+}
+
+.prose h2 {
+  font-size: 1.3em !important;
+}
+
+.prose h3 {
+  font-size: 1.15em !important;
+}
+
+/* Settings page font boost */
+[class*="Settings"] label,
+[class*="Settings"] p,
+[class*="Settings"] span,
+[class*="Settings"] div {
+  font-size: max(13px, inherit);
 }
 
 /* Glassmorphism Utilities */
@@ -170,4 +208,85 @@ body,
 
 .hover-glow:hover {
   box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+}
+
+/* ------------------------------------- */
+/* PIXEL FILL LOADER ANIMATION           */
+/* ------------------------------------- */
+.pixel-loader-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 10px);
+  gap: 4px;
+  justify-content: center;
+  margin: 10px auto;
+}
+
+.pixel-loader-grid .pixel {
+  width: 10px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  animation: pixelPulse 2.5s infinite ease-in-out;
+}
+
+@keyframes pixelPulse {
+
+  0%,
+  15% {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1);
+    box-shadow: none;
+  }
+
+  40%,
+  60% {
+    background: #06b6d4;
+    transform: scale(1.15);
+    box-shadow: 0 0 8px rgba(6, 182, 212, 0.8);
+  }
+
+  85%,
+  100% {
+    background: rgba(255, 255, 255, 0.1);
+    transform: scale(1);
+    box-shadow: none;
+  }
+}
+
+/* ------------------------------------- */
+/* NOVA IMAGE GENERATION LOADER          */
+/* ------------------------------------- */
+.nova-image-loader {
+  box-shadow: 0 0 30px rgba(0, 255, 255, 0.15);
+}
+
+.nova-loader-glow {
+  box-shadow: 0 0 40px rgba(0, 255, 255, 0.2);
+  animation: nova-pulse-glow 2.5s infinite alternate ease-in-out;
+}
+
+@keyframes nova-pulse-glow {
+  from {
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+    filter: brightness(1);
+  }
+
+  to {
+    box-shadow: 0 0 60px rgba(128, 0, 255, 0.4);
+    filter: brightness(1.15);
+  }
+}
+
+@keyframes shimmer-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer-sweep {
+  animation: shimmer-sweep 2s infinite ease-in-out;
 }

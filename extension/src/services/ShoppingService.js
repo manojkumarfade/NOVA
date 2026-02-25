@@ -1,342 +1,438 @@
-import { SearchService } from './SearchService';
 import { LLMClient } from './LLMClient';
 import { StorageService } from './StorageService';
+import { SearchService } from './SearchService';
+import { SwarmService } from './SwarmService';
+export class ShoppingService {
+    static conversationContext = [];
 
-// ==========================================
-// 1. CANONICAL DATA MODELS
-// ==========================================
+    static async getApiKeys() {
+        const providers = await StorageService.get('llm_providers') || [];
+        const typegpt = providers.find(p => p.id === 'typegpt') || providers[0];
 
-export class Product {
-    constructor({ id, name, brand, model, category, launchYear, msrp, link }) {
-        this.id = id || Math.random().toString(36).substr(2, 9);
-        this.name = name;
-        this.brand = brand || 'Unknown';
-        this.model = model || '';
-        this.category = category || '';
-        this.launchYear = launchYear || new Date().getFullYear();
-        this.msrp = msrp || 0;
-        this.link = link || ''; // Added link for navigation
-    }
-}
-
-export class PriceSnapshot {
-    constructor({ site, basePrice, offers, stock, fetchedAt, link }) {
-        this.site = site;
-        this.basePrice = basePrice;
-        this.offers = offers || []; // Array of {type: 'bank'|'coupon', discount: number, maxCap: number}
-        this.stock = stock;
-        this.fetchedAt = fetchedAt || Date.now();
-        this.link = link;
-    }
-}
-
-export class EffectivePrice {
-    constructor({ site, basePrice, effectivePrice, breakdown, confidence, link }) {
-        this.site = site;
-        this.basePrice = basePrice;
-        this.effectivePrice = effectivePrice;
-        this.breakdown = breakdown; // Explain how we got here
-        this.confidence = confidence;
-        this.link = link;
-    }
-}
-
-// ==========================================
-// 2. SHOPPING ENGINE
-// ==========================================
-
-export const ShoppingService = {
-
-    // --- A. Constraint Parser ---
-    async parseCommand(command) {
-        // [Existing logic remains same]
-        console.log(`🧠 [Shopping] Parsing intent: "${command}"...`);
-        const systemPrompt = `
-        You are a Shopping Intent Parser.
-        Extract parameters from the user's request.
-        
-        Output JSON ONLY:
-        {
-          "category": "headphones" | "laptop" | "shoes" | "saree" | "etc",
-          "brand": "Sony" | "Apple" | null,
-          "budget": number | null,
-          "year": 2024 | 2025 | 2026 | null,
-          "query": "The optimized search query to find these items"
-        }
-        `;
-
-        try {
-            const response = await LLMClient.chatCompletion([
-                { role: 'system', content: systemPrompt },
-                { role: 'user', content: command }
-            ], null, { temperature: 0.1 });
-            return JSON.parse(response.replace(/```json/g, '').replace(/```/g, '').trim());
-        } catch (e) {
-            console.error("[Shopping] Parse Error", e);
-            return { query: command, category: 'general', budget: null };
-        }
-    },
-
-    // --- B. Product Universe Builder (DEEP READ V2) ---
-    async buildProductUniverse({ category, brand, budget, query, year }) {
-        console.log(`🌌 [Shopping] Building universe via Deep Research for: ${query}`);
-
-        // 1. Search for "Best [Category] 2026" lists
-        const searchResults = await SearchService.search(query + " best review list");
-
-        // 2. DEEP READ: Fetch content of Top 2 Review Articles
-        let combinedContext = "";
-        let sourcesRead = 0;
-
-        for (const res of searchResults.slice(0, 3)) { // Read top 3 articles
-            // Skip generic e-commerce listings, look for blogs/reviews
-            if (sourcesRead >= 2) break;
-
-            console.log(`📖 [Shopping] Reading Article: ${res.title}`);
-            const content = await SearchService.fetchPageContent(res.link);
-
-            if (content && content.length > 500) {
-                combinedContext += `\n\n=== SOURCE: ${res.title} ===\n${content.substring(0, 15000)}`;
-                sourcesRead++;
-            }
-        }
-
-        if (!combinedContext) {
-            console.warn("Could not fetch article content, falling back to snippets.");
-            combinedContext = searchResults.map(r => r.snippet).join('\n');
-        }
-
-        // 3. LLM Extraction of Candidates
-        console.log(`🧠 [Shopping] Extracting Top Candidates from ${sourcesRead} articles...`);
-
-        // FALLBACK: If we couldn't read full articles (e.g. anti-bot blocks), use snippets.
-        const useSnippets = sourcesRead === 0 || !combinedContext;
-        const contextToUse = useSnippets ?
-            searchResults.map(r => `Title: ${r.title}\nSnippet: ${r.snippet}`).join('\n\n') :
-            combinedContext;
-
-        if (useSnippets) console.warn("[Shopping] Deep Read failed/empty. Using Search Snippets as fallback.");
-
-        const extractionPrompt = `
-        Context: ${useSnippets ? 'Search Results Snippets' : 'Full Review Articles'} for ${query}.
-        
-        Task: Identify the Top 3-5 BEST products mentioned that match the criteria.
-        Criteria:
-        - Category: ${category}
-        - Budget: ${budget ? `Strictly under ${budget} INR` : 'Reasonable price'}
-        
-        Rules:
-        1. **Strict Budget**: If a budget is set (${budget}), DO NOT suggest items significantly above it (max +10% tolerance).
-        2. **Diversity**: Suggest 3 DISTINCT models (different brands if possible).
-        3. **Specifics**: Use exact Model Names (e.g. "Samsung Galaxy S25").
-        4. **Extract "Why to Buy"**: A persuasive one-liner.
-        5. **Extract "Key Features"**: 2-3 highlights.
-
-        Output JSON:
-        [
-          { "name": "Model Name", "reason": "Why it is a winner", "features": ["Feature 1", "Feature 2"] }
-        ]
-        `;
-
-        let candidates = [];
-        try {
-            const response = await LLMClient.chatCompletion([
-                { role: 'system', content: `Context:\n${contextToUse}` }, // Use dynamic context
-                { role: 'user', content: extractionPrompt }
-            ], null, { temperature: 0.1 });
-
-            const raw = JSON.parse(response.replace(/```json/g, '').replace(/```/g, '').trim());
-            candidates = raw.map(c => {
-                const p = new Product({
-                    name: c.name,
-                    brand: brand || 'Unknown',
-                    category: category,
-                    launchYear: year,
-                    msrp: 0
-                });
-                p.reason = c.reason;
-                p.features = c.features || [];
-                return p;
-            });
-        } catch (e) {
-            console.warn("Candidate extraction failed", e);
-        }
-
-        // [FALLBACK] If LLM returned empty list (strict budget?) or error occurred
-        if (candidates.length === 0) {
-            console.warn("LLM returned 0 candidates. Using Search Results as Fallback.");
-            return searchResults.slice(0, 3).map(r => new Product({
-                name: r.title.replace(/\|.*/, '').replace(/\.\.\./, '').trim(),
-                category: category || 'General',
-                brand: brand || 'Unknown'
-            }));
-        }
-
-        return candidates;
-
-        // [POST-FILTER] Logic check for duplicates or budget
-        // ... (Optional additional filter logic if needed)
-
-        return candidates;
-    },
-
-    // --- C. Scoring Engine ---
-    async scoreAndShortlist(products) {
-        // Since we already filtered via LLM, we trust these are good candidates.
-        return products.slice(0, 3);
-    },
-
-    // --- D. Price Resolution (MULTI-SITE + LLM V2) ---
-    async resolvePrices(product) {
-        console.log(`🕵️ [Shopping] Hunting prices for: ${product.name}`);
-
-        // Multi-Site Search
-        const storeQuery = `buy ${product.name} price india`;
-        const storeResults = await SearchService.search(storeQuery + " site:amazon.in OR site:flipkart.com OR site:croma.com");
-
-        const snapshots = [];
-        const seenSites = new Set();
-
-        for (const res of storeResults.slice(0, 5)) {
-            let site = 'Unknown';
-            if (res.link.includes('amazon')) site = 'Amazon';
-            else if (res.link.includes('flipkart')) site = 'Flipkart';
-            else if (res.link.includes('croma')) site = 'Croma';
-            else if (res.link.includes('reliance')) site = 'Reliance';
-
-            if (seenSites.has(site) && site !== 'Unknown') continue; // One per site
-
-            console.log(`   > Checking ${site}: ${res.link}`);
-            let price = 0;
-            let source = 'page';
-
-            // 1. TRY SNIPPET EXTRACTION (Fastest & avoids blocking)
-            // Look for patterns like "₹1,299" or "Rs. 1,299" in the snippet
-            const snippetPriceMatch = res.snippet?.match(/(?:₹|Rs\.?)\s?([\d,]+)/i);
-            if (snippetPriceMatch) {
-                const raw = snippetPriceMatch[1].replace(/,/g, '');
-                const val = parseInt(raw, 10);
-                if (!isNaN(val) && val > 100) {
-                    price = val;
-                    source = 'snippet';
-                    console.log(`   >> Found Snippet Price: ${price}`);
-                }
-            }
-
-            // 2. TRY PAGE CONTENT (Deep Verification)
-            // Only if snippet failed or we want to double check (but here we prioritize coverage)
-            // Amazon/Flipkart usually block fetchPageContent, so we proceed if snippet worked.
-
-            if (price === 0) { // Only fetch if we didn't find in snippet
-                const content = await SearchService.fetchPageContent(res.link);
-                if (content) {
-                    const pricePrompt = `
-                     Extract the CURRENT BUYING PRICE for: "${product.name}" from this text.
-                     Text: ${content.substring(0, 1000)}
-                     Ignore "EMI" or "Exchange". Return integer only. If missing return 0.
-                     Output JSON: { "price": 24999 }
-                     `;
-
-                    try {
-                        const priceRes = await LLMClient.chatCompletion([
-                            { role: 'user', content: pricePrompt }
-                        ], null, { temperature: 0 });
-                        const data = JSON.parse(priceRes.replace(/```json/g, '').replace(/```/g, '').trim());
-                        if (data.price > 100) {
-                            price = data.price;
-                            source = 'llm';
-                        }
-                    } catch (e) { }
-                }
-            }
-
-            if (price > 100) {
-                snapshots.push(new PriceSnapshot({
-                    site,
-                    basePrice: price,
-                    offers: [],
-                    stock: true,
-                    link: res.link
-                }));
-                if (site !== 'Unknown') seenSites.add(site);
-            }
-        }
-
-        return snapshots;
-    },
-
-    // --- E. Effective Price Calculation ---
-    computeEffectivePrice(snapshot) {
-        let finalPrice = snapshot.basePrice;
-        const applied = [];
-
-        // Apply logic: max 1 bank + 1 coupon
-        const bankOffer = snapshot.offers.find(o => o.type === 'bank');
-        if (bankOffer) {
-            finalPrice -= bankOffer.discount;
-            applied.push(`Bank Offer: -₹${bankOffer.discount}`);
-        }
-
-        const coupon = snapshot.offers.find(o => o.type === 'coupon');
-        if (coupon) {
-            finalPrice -= coupon.discount;
-            applied.push(`Coupon: -₹${coupon.discount}`);
-        }
-
-        return new EffectivePrice({
-            site: snapshot.site,
-            basePrice: snapshot.basePrice,
-            effectivePrice: finalPrice,
-            breakdown: applied,
-            confidence: snapshot.stock ? 0.9 : 0.4,
-            link: snapshot.link
-        });
-    },
-
-    // --- F. Orchestrator (COMPARISON MODE) ---
-    async process(userRequest, onProgress) {
-        onProgress({ status: 'planning', message: 'Shopping Agent: Parsing & Researching (Deep Read)...' });
-
-        // 1. Constraints
-        const constraints = await this.parseCommand(userRequest);
-
-        // 2. Universe (Deep)
-        onProgress({ status: 'thinking', message: `Reading Reviews to find best "${constraints.category}"... (This may take 10s)` });
-        const candidates = await this.buildProductUniverse(constraints);
-
-        if (candidates.length === 0) return { message: "Could not identify specific top products from reviews." };
-
-        // 3. Resolve All Candidates (Compare)
-        const results = [];
-
-        // Parallel-ish processing (sequential for now to avoid rate limits)
-        for (const p of candidates.slice(0, 3)) { // Force Top 3
-            onProgress({ status: 'navigating', message: `Comparing prices for ${p.name}...` });
-            const snapshots = await this.resolvePrices(p);
-
-            if (snapshots.length > 0) {
-                // Find best among snapshots
-                snapshots.sort((a, b) => a.basePrice - b.basePrice);
-                results.push({
-                    product: p,
-                    bestDeal: snapshots[0],
-                    alternatives: snapshots.slice(1)
-                });
-            }
-        }
-
-        // 4. Final Comparison Table via LLM
-        onProgress({ status: 'thinking', message: 'Generating Comparison Table...' });
-
-        if (results.length === 0) return { message: "Found products but could not verify live Indian prices." };
-
-        // Sort results by price or relevance
-        results.sort((a, b) => a.bestDeal.basePrice - b.bestDeal.basePrice);
-
+        // DuckDuckGo doesn't require keys. Just return what is needed.
         return {
-            results,
-            message: `Identified ${results.length} top options.`,
-            summary: "Shopping Task Complete"
+            typegptKey: typegpt?.apiKey
         };
     }
-};
+
+    static async process(query, onProgress, profile = '', forceSearch = false, signal, checkStop) {
+        const keys = await this.getApiKeys();
+
+        // Ensure checkStop is passed down; if not, create a dummy to prevent crashes
+        const safeCheckStop = checkStop || (() => { });
+
+        const contextString = this.conversationContext.map(m => `${m.role}: ${m.content}`).join('\n');
+
+        if (!forceSearch) {
+            safeCheckStop();
+            onProgress({ status: 'thinking', message: 'Analyzing user constraints...' });
+
+            const validationPrompt = `Evaluate this user shopping request: "${query}". 
+Recent Conversation Context: 
+${contextString}
+
+You are in the "Information Gathering" phase. You DO NOT HAVE WEB ACCESS YET.
+CRITICAL RULES:
+1. DOES THIS QUERY NEED CLARIFICATION? If it's too broad (e.g. "gaming smartphone"), you must ask 1 short question to narrow it down (budget, brand, etc).
+2. HAS THE USER PROVIDED ENOUGH DETAILS? If they already gave budget or specific features, or if you already asked 1-2 questions, YOU MUST PROCEED.
+3. DO NOT HALLUCINATE PRODUCTS. NEVER GIVE RECOMMENDATIONS HERE.
+
+Return ONLY a valid JSON object matching this schema, nothing else:
+{
+  "shouldProceed": true or false,
+  "replyToUser": "Your short 1-sentence question to the user (leave EMPTY if shouldProceed is true)"
+}`;
+
+            const validationResult = await LLMClient.chatCompletion([{ role: 'user', content: validationPrompt }], 'openai/gpt-oss-120b', { temperature: 0.1, signal: signal });
+            safeCheckStop();
+
+            let needsProceed = true;
+            let validationMessage = "";
+            try {
+                const match = validationResult.match(/\{[\s\S]*\}/);
+                const parsed = JSON.parse(match ? match[0] : validationResult);
+                needsProceed = !parsed.shouldProceed;
+                validationMessage = parsed.replyToUser || "";
+            } catch (e) {
+                needsProceed = !validationResult.includes('PROCEED');
+                validationMessage = validationResult;
+            }
+
+            if (needsProceed && validationMessage && validationMessage.trim() !== '') {
+                this.conversationContext.push({ role: 'user', content: query });
+                this.conversationContext.push({ role: 'assistant', content: validationMessage });
+                if (this.conversationContext.length > 6) this.conversationContext = this.conversationContext.slice(-6);
+
+                return { isShopping: false, message: validationMessage, needsProceed: true };
+            }
+        }
+
+        safeCheckStop();
+        onProgress({ status: 'thinking', message: 'Expanding query for product search...' });
+
+        const expansionPrompt = `Convert the tracking context and query into a highly optimized product search term.
+Recent Context:
+${contextString}
+Query: "${query}"
+
+Return ONLY a valid JSON object matching this schema, nothing else:
+{
+  "searchString": "highly optimized search keywords that look for the best products, including 2026 models, specific prices, and brands"
+}
+${profile ? '\nUser profile/preferences: ' + profile : ''}`;
+
+        const llmExpansion = await LLMClient.chatCompletion([{ role: 'user', content: expansionPrompt }], 'openai/gpt-oss-120b', { temperature: 0.3, signal: signal });
+        safeCheckStop();
+
+        let searchString = query;
+        try {
+            const match = llmExpansion.match(/\{[\s\S]*\}/);
+            const parsed = JSON.parse(match ? match[0] : llmExpansion);
+            if (parsed.searchString) searchString = parsed.searchString;
+        } catch (e) {
+            console.warn("Failed to parse expansion JSON, using default", e);
+        }
+
+        onProgress({ status: 'navigating', message: `Searching the web via DuckDuckGo...` });
+
+        let searchData = "";
+        try {
+            safeCheckStop();
+            const results = await SearchService.search(searchString);
+            safeCheckStop();
+            if (!results || results.length === 0) throw new Error("DuckDuckGo returned no results.");
+
+            // Get top 6 URLs for broader product link discovery
+            const topUrls = results.slice(0, 6).map(r => r.link);
+            onProgress({ status: 'navigating', message: `Analyzing Page Metadata from ${topUrls.length} pages...` });
+
+            // DOM content extractor for shopping — specifically harvests direct product URLs
+            const contentExtractor = () => {
+                try {
+                    // Harvest ALL e-commerce links from the page
+                    const allLinks = Array.from(document.querySelectorAll('a'))
+                        .filter(a => a.href && (a.href.includes('amazon.in') || a.href.includes('flipkart.com') || a.href.includes('croma.com') || a.href.includes('reliancedigital.in') || a.href.includes('myntra.com')))
+                        .map(a => ({ text: (a.innerText || '').trim(), href: a.href }));
+
+                    // Separate DIRECT product links from search/listing links
+                    const directProductLinks = allLinks.filter(l =>
+                        l.href.includes('/dp/') || l.href.includes('/product/') || l.href.includes('/p/') ||
+                        l.href.includes('/itm/') || l.href.match(/\/[A-Z0-9]{10}(?:\/|$)/)
+                    ).map(l => `[DIRECT PRODUCT] ${l.text}: ${l.href}`);
+
+                    const otherLinks = allLinks.filter(l =>
+                        !l.href.includes('/dp/') && !l.href.includes('/product/') && !l.href.includes('/p/') &&
+                        !l.href.includes('/itm/') && !l.href.match(/\/[A-Z0-9]{10}(?:\/|$)/)
+                    ).map(l => `[OTHER] ${l.text}: ${l.href}`);
+
+                    const text = document.body.innerText || '';
+                    const cleaned = text.replace(/\s+/g, ' ').substring(0, 4000);
+                    const linksSection = [...directProductLinks, ...otherLinks.slice(0, 5)].join('\n');
+                    return { url: window.location.href, title: document.title, content: cleaned + '\n\n=== PRODUCT LINKS FOUND ON PAGE ===\n' + linksSection.substring(0, 2500) };
+                } catch (e) {
+                    return { url: window.location.href, title: document.title, content: '', error: e.message };
+                }
+            };
+
+            const tabResults = await SwarmService.spawnWithConcurrency(
+                topUrls,
+                contentExtractor,
+                3,      // 3 concurrent
+                15000,  // 15s timeout
+                (tabIndex, status) => {
+                    const messages = ["Comparing Price Points...", "Verifying Seller Rating...", "Locating Add-to-Cart Selectors..."];
+                    const subtask = messages[tabIndex % messages.length];
+                    // safeCheckStop(); // Can't easily checkStop inside the callback synchronously without risking unhandled promise rejection state mapping errors, but we can pass signal to SwarmService down the line if needed.
+                    onProgress({ status: 'thinking', message: subtask });
+                }
+            );
+            safeCheckStop();
+
+            // Combine successful extractions
+            const validExtractions = tabResults.filter(r => r.status === 'success' && r.result?.content?.length > 100);
+
+            if (validExtractions.length > 0) {
+                searchData = validExtractions.map(r => `=== SOURCE: ${r.result.title} (${r.result.url}) ===\n${r.result.content}`).join('\n\n');
+            } else {
+                searchData = results.map(r => `Title: ${r.title}\nURL: ${r.link}\nSnippet: ${r.snippet}`).join('\n\n---\n\n');
+            }
+
+        } catch (err) {
+            console.warn("DDG search failed:", err);
+            return { isShopping: false, message: `Web Search failed: ${err.message}. Please try a slightly different query.` };
+        }
+
+        safeCheckStop();
+        onProgress({ status: 'thinking', message: 'Reading through products and reasoning out the best option...' });
+
+        const analysisSystemPrompt = `
+<Context>
+You are an expert human Procurement Agent named Nova. You have been given live web data from DuckDuckGo.
+Your goal: Help the user BUY the best product, not just read about it.
+User Profile/Preferences: ${profile || 'None'}
+</Context>
+
+<Rules>
+1. IDENTIFY: What is the user's hidden need? (e.g. "Gaming" means low latency is prioritized over battery).
+2. It's okay to read reviews and listicles! Extract the absolute best products that exactly match the budget/criteria.
+3. CRITICAL URL RULES — READ CAREFULLY:
+   a. You MUST look at the "=== PRODUCT LINKS FOUND ON PAGE ===" sections in the data. Lines marked [DIRECT PRODUCT] are DIRECT product page URLs — USE THESE.
+   b. Direct product URLs contain patterns like: /dp/, /product/, /p/, /itm/ — these are VALID.
+   c. NEVER use search/listing URLs that contain: /s?k=, /search, /s/, /browse/ — these are INVALID.
+   d. If you cannot find a direct product URL for a product, put "Check Site" in the url field. Do NOT construct a /s?k= search URL.
+   e. DuckDuckGo links are NEVER valid product URLs.
+4. Do not blindly refuse a good product just to reach a high arbitrary count. Try to extract 4-5 products if available.
+5. IF a direct product page on Flipkart or Amazon lacks a clear price tag in the scraped text, DO NOT discard it! Just estimate the price or put "Check Site" and include it anyway. Direct product URLs are incredibly valuable.
+</Rules>
+
+<Data>
+${searchData.substring(0, 50000)}
+</Data>
+
+<Task>
+Identify the absolute Winners for: "${query}". 
+CRITICAL RULE FOR PRODUCT COUNT: You MUST extract AT LEAST 5 highly qualified products from the provided text! Do not stop at just 1. It is absolutely unacceptable to return only 1 product.
+
+CRITICAL RULE FOR DUPLICATES: You MUST extract 5 DISTINCT product models/brands (e.g. OnePlus 15, iQOO 15, Samsung S25, Vivo X200, Xiaomi 15). DO NOT extract the exact same product 5 times with different colors or storage capacities! Every item in your array must be a completely different product model from the others.
+
+If you cannot find 5 products, you MUST return at least 1 or 2 products that loosely fit the criteria. NEVER return an empty array [].
+
+Make sure you output a purely valid JSON structure (DO NOT WRAP IN MARKDOWN) like this:
+{
+  "thought_process": "Explain your detailed human-like trade-offs and reasoning here out loud",
+  "products": [
+    {
+      "name": "Product Name",
+      "price": "Current Price in INR (e.g. ₹4,999)",
+      "specs": ["spec 1", "spec 2", "spec 3"],
+      "explanation": "A concise explanation of why it fits user preferences.",
+      "url": "CRITICAL: ONLY use [DIRECT PRODUCT] URLs from the data containing /dp/ or /product/ or /p/. NEVER construct /s?k= search URLs!",
+      "image": "Image URL if found",
+      "score": "Overall Score 1-10",
+      "badge": "best or premium"
+    }
+  ]
+}
+</Task>
+`;
+
+        const responseJSONStr = await LLMClient.chatCompletion([{ role: 'user', content: analysisSystemPrompt }], 'openai/gpt-oss-120b', { temperature: 0.3, signal: signal });
+        safeCheckStop();
+
+        let products = [];
+        let thoughts = "";
+        try {
+            const cleanJsonStr = responseJSONStr.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
+            const jsonMatch = cleanJsonStr.match(/\{[\s\S]*\}/);
+            const parsed = JSON.parse(jsonMatch ? jsonMatch[0] : cleanJsonStr);
+            products = parsed.products || [];
+            thoughts = parsed.thought_process || "";
+
+            // POST-PROCESSING: Sanitize URLs — strip any search/listing URLs the LLM constructed
+            products = products.map(p => {
+                let url = p.url;
+                if (url && url !== 'Check Site') {
+                    const lower = url.toLowerCase();
+                    if (lower.includes('/s?k=') || lower.includes('/s/ref=') || lower.includes('/search?') || lower.includes('/browse/') || lower.includes('duckduckgo.com')) {
+                        url = null;
+                    }
+                } else {
+                    url = null;
+                }
+                return { ...p, url };
+            });
+
+            // PHASE 2: Resolve direct product URLs via fetch() — not tabs, pure HTML parsing
+            const productsNeedingUrl = products.filter(p => !p.url && p.name);
+            if (productsNeedingUrl.length > 0) {
+                safeCheckStop();
+                onProgress({ status: 'navigating', message: `Resolving direct product links for ${productsNeedingUrl.length} products...` });
+
+                // Fetch Amazon search HTML and extract /dp/ link for a single product
+                const resolveAmazonUrl = async (productName) => {
+                    try {
+                        const searchUrl = `https://www.amazon.in/s?k=${encodeURIComponent(productName)}`;
+                        const response = await fetch(searchUrl, {
+                            headers: {
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                                'Accept-Language': 'en-IN,en;q=0.9'
+                            }
+                        });
+                        if (!response.ok) return null;
+                        const html = await response.text();
+
+                        // Extract all /dp/ASIN links from raw HTML using regex
+                        const dpPattern = /href="\/([^"]*\/dp\/([A-Z0-9]{10})[^"]*)"/gi;
+                        const matches = [...html.matchAll(dpPattern)];
+
+                        // Filter out sponsored results (/sspa/) and dedup by ASIN
+                        const seen = new Set();
+                        const validLinks = [];
+                        for (const m of matches) {
+                            const fullPath = m[1];
+                            const asin = m[2];
+                            if (!seen.has(asin) && !fullPath.includes('/sspa/') && !fullPath.includes('gp/slredirect')) {
+                                seen.add(asin);
+                                validLinks.push(`https://www.amazon.in/${fullPath.split('?')[0]}`);
+                            }
+                            if (validLinks.length >= 3) break; // Top 3 is enough
+                        }
+
+                        return validLinks.length > 0 ? validLinks[0] : null;
+                    } catch (e) {
+                        console.warn(`Failed to resolve URL for ${productName}:`, e);
+                        return null;
+                    }
+                };
+
+                // Resolve all products in parallel
+                const resolvePromises = productsNeedingUrl.map(p => resolveAmazonUrl(p.name));
+                const resolvedUrls = await Promise.allSettled(resolvePromises);
+
+                // Map resolved URLs back to products
+                let resolveIndex = 0;
+                products = products.map(p => {
+                    if (!p.url && p.name) {
+                        const result = resolvedUrls[resolveIndex];
+                        resolveIndex++;
+                        if (result.status === 'fulfilled' && result.value) {
+                            return { ...p, url: result.value };
+                        }
+                    }
+                    return p;
+                });
+
+                onProgress({ status: 'thinking', message: `Resolved ${resolvedUrls.filter(r => r.status === 'fulfilled' && r.value).length} direct product links.` });
+            }
+
+            if (products.length > 0) {
+                const memoryStr = products.map(p => `${p.name} - ${p.price}`).join(', ');
+                this.conversationContext.push({ role: 'user', content: query });
+                this.conversationContext.push({ role: 'assistant', content: `I found and recommended these products to the user based on their query: ${memoryStr}` });
+                if (this.conversationContext.length > 6) this.conversationContext = this.conversationContext.slice(-6);
+            }
+
+        } catch (e) {
+            console.error("Failed to parse LLM JSON:", e, responseJSONStr);
+            return { isShopping: false, message: "Failed to parse product data from LLM." };
+        }
+
+        const winnerUrl = products.length > 0 ? products[0].url : null;
+        const winnerProduct = products.length > 0 ? products[0].name : null;
+
+        return {
+            isShopping: true,
+            products: products,
+            thought_process: thoughts,
+            message: `Here are the top recommendations based on your request. Do you have any specific questions about these, or should I add the best one to your cart?`,
+            winnerUrl: winnerUrl,
+            winnerProduct: winnerProduct
+        };
+    }
+
+    static async comparePrices(productUrl, productName, onProgress) {
+        onProgress({ status: 'navigating', message: `Opening Flash.co and comparing prices for ${productName}...` });
+
+        return new Promise((resolve, reject) => {
+            chrome.tabs.create({ url: 'https://flash.co', active: true }, (tab) => {
+                const tabId = tab.id;
+
+                chrome.tabs.onUpdated.addListener(function listener(tId, changeInfo) {
+                    if (tId === tabId && changeInfo.status === 'complete') {
+                        chrome.tabs.onUpdated.removeListener(listener);
+                        onProgress({ status: 'navigating', message: `Injecting automation script into Flash.co...` });
+
+                        setTimeout(() => {
+                            chrome.scripting.executeScript({
+                                target: { tabId: tabId },
+                                files: ['flashco-automation.js'] // Relies on build moving it to root
+                            }, () => {
+                                if (chrome.runtime.lastError) {
+                                    return resolve({ isShopping: false, message: 'Failed to inject script: ' + chrome.runtime.lastError.message });
+                                }
+
+                                onProgress({ status: 'thinking', message: `Running search on Flash.co...` });
+                                chrome.tabs.sendMessage(tabId, { action: 'startComparison', url: productUrl }, async (response) => {
+                                    if (!response) return resolve({ isShopping: false, message: 'Failed to communicate with Flash.co automation.' });
+                                    if (response.error) return resolve({ isShopping: false, message: response.error });
+
+                                    onProgress({ status: 'thinking', message: `Analyzing comparison results...` });
+                                    const storesData = response.data.storesData || response.data;
+                                    const aiSummary = response.data.aiSummary || "";
+
+                                    const comparePrompt = `You are an elite conversational Indian shopping assistant. I searched Flash.co for pricing and specs on ${productName}.
+Here are the store prices I found:
+${JSON.stringify(storesData, null, 2)}
+
+${aiSummary ? `\nHere are the actual product specs, pros, and cons I scraped:\n${aiSummary}\n` : ''}
+
+Compare these prices in INR. Identify the absolute best deal considering price and store reputation.
+If I provided specs and pros above, you MUST organically weave them into your recommendation to explain WHY this product is good! Do not just list prices. Mention the key specs and why it fits their needs.
+Output a nice, conversational PLAIN TEXT summary of your recommendation. At the end, ask if they would like you to add the winning item to their cart!
+CRITICAL RULE: DO NOT use markdown tables or complex markdown structures. Use ONLY simple bolding (**) and basic bullet points (-) for the formatting!`;
+
+                                    const llmResponse = await LLMClient.chatCompletion([{ role: 'user', content: comparePrompt }], 'openai/gpt-oss-120b', { temperature: 0.3 });
+
+                                    ShoppingService.conversationContext.push({ role: 'user', content: `Can you compare prices and give me the specs for ${productName}?` });
+                                    ShoppingService.conversationContext.push({ role: 'assistant', content: llmResponse });
+                                    if (ShoppingService.conversationContext.length > 6) ShoppingService.conversationContext = ShoppingService.conversationContext.slice(-6);
+
+                                    resolve({
+                                        isShopping: false,
+                                        message: `### AI Recommendation\n\n${llmResponse}`,
+                                        extraData: storesData // To be handled by UI if needed
+                                    });
+                                });
+                            });
+                        }, 1500);
+                    }
+                });
+            });
+        });
+    }
+
+    static async startCartAutomation(productUrl, onProgress) {
+        onProgress({ status: 'navigating', message: `Opening product page...` });
+
+        return new Promise((resolve) => {
+            chrome.tabs.create({ url: productUrl, active: true }, (tab) => {
+                const tabId = tab.id;
+
+                chrome.tabs.onUpdated.addListener(function listener(tId, changeInfo) {
+                    if (tId === tabId && changeInfo.status === 'complete') {
+                        chrome.tabs.onUpdated.removeListener(listener);
+                        onProgress({ status: 'thinking', message: `Injecting cart automation script...` });
+
+                        // Wait for page DOM to fully settle (Amazon is heavy)
+                        setTimeout(() => {
+                            chrome.scripting.executeScript({
+                                target: { tabId: tabId },
+                                files: ['cart-automation.js']
+                            }, () => {
+                                if (chrome.runtime.lastError) {
+                                    return resolve({ isShopping: false, message: `Error injecting script: ${chrome.runtime.lastError.message}` });
+                                }
+
+                                onProgress({ status: 'thinking', message: `Clicking "Add to Cart" button...` });
+
+                                // Directly click Add to Cart — no questions, no LLM
+                                chrome.tabs.sendMessage(tabId, { action: 'executeClicks', clicks: ['Add to Cart'] }, (resp) => {
+                                    const executionLog = resp ? resp.log : "No response from tab.";
+                                    const success = executionLog.toLowerCase().includes('clicked');
+                                    resolve({
+                                        isShopping: false,
+                                        message: success
+                                            ? `✅ Done! I've added the item to your cart.\n\n**Automation Log:**\n${executionLog}`
+                                            : `⚠️ I opened the product page but couldn't find the Add to Cart button. You can add it manually from the open tab.\n\n**Log:**\n${executionLog}`
+                                    });
+                                });
+                            });
+                        }, 5000); // 5s wait for Amazon's heavy DOM
+                    }
+                });
+            });
+        });
+    }
+
+}

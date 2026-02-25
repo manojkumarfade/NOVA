@@ -1,3 +1,11 @@
+/**
+ * @file ModelsSettings.jsx
+ * @description Core functionality for ModelsSettings.
+ * Handles the primary logic and responsibilities designated for this module.
+ * 
+ * @context Options UI Component (React)
+ */
+
 import React, { useState, useEffect } from 'react';
 import Icon from '../../shared/components/AppIcon';
 import Select from '../../shared/components/ui/Select';
@@ -26,13 +34,67 @@ const ModelsSettings = () => {
       // Load providers to build options
       const providers = await StorageService.get('llm_providers');
       if (providers && providers.length > 0) {
+        const DEFAULT_LLM_MODELS = {
+          openai: [
+            'gpt-5.2-pro', 'gpt-5.1', 'o3-pro', 'o1-preview',
+            'gpt-5', 'gpt-4.1-mini', 'gpt-4o', 'gpt-4-turbo-2024-04-09',
+            'gpt-4-0613', 'gpt-4-32k-0613',
+            'gpt-3.5-turbo-0125', 'gpt-3.5-turbo-instruct',
+            'davinci-002', 'babbage-002'
+          ],
+          google: [
+            'gemini-3-pro', 'gemini-3-flash', 'gemini-2.5-pro', 'gemini-2.5-flash',
+            'gemini-2.0-flash-001', 'gemini-2.0-flash-lite',
+            'gemini-1.5-pro-001', 'gemini-1.5-flash-001', 'gemini-1.5-pro', 'gemini-1.5-flash',
+            'gemini-1.0-pro'
+          ],
+          anthropic: [
+            'claude-opus-4.6', 'claude-sonnet-4.5', 'claude-haiku-4.5',
+            'claude-3-7-sonnet-20250219', 'claude-3-opus-20240229', 'claude-3-sonnet-20240229', 'claude-3-5-sonnet-20240620',
+            'claude-2.0', 'claude-2.1',
+            'claude-1.0', 'claude-instant-1.2'
+          ],
+          xai: [
+            'grok-4.1', 'grok-4', 'grok-4-fast-reasoning',
+            'grok-2-vision-1212', 'grok-vision-beta',
+            'grok-3', 'grok-3-mini-beta',
+            'grok-2-1212', 'grok-1.5', 'grok-beta'
+          ],
+          typegpt: [
+            'zai-org/GLM-4.6',
+            'deepseek-ai/DeepSeek-R1-0528',
+            'Qwen/Qwen3-235B-A22B-Thinking-2507',
+            'Qwen/Qwen3-235B-A22B-Instruct-2507',
+            'moonshotai/kimi-k2-instruct-0905',
+            'moonshotai/kimi-k2-thinking',
+            'moonshotai/kimi-k2-instruct',
+            'qwen/qwen3-coder-480b-a35b-instruct',
+            'deepseek-ai/deepseek-r1',
+            'deepseek-ai/deepseek-r1-0528',
+            'openai/gpt-oss-120b',
+            'openai/gpt-oss-20b',
+            'mistralai/mistral-large-3-675b-instruct-2512',
+            'deepseek-ai/deepseek-v3.1-terminus',
+            'deepseek-ai/deepseek-v3.1',
+            'mistralai/mistral-large',
+            'mistralai/mistral-small-24b-instruct',
+            'mistralai/magistral-small-2506',
+            'mistralai/mistral-small-3.1-24b-instruct-2503',
+            'mistralai/ministral-14b-instruct-2512',
+            'qwen/qwen3-next-80b-a3b-thinking',
+            'qwen/qwen3-next-80b-a3b-instruct'
+          ]
+        };
         const options = providers
           .filter(p => p.isEnabled)
-          .flatMap(p => p.models.map(m => ({
-            value: m,
-            label: m.split('/').pop(), // Simple label
-            description: `Provided by ${p.name}`
-          })));
+          .flatMap(p => {
+            const pModels = DEFAULT_LLM_MODELS[p.id] || p.models || [];
+            return pModels.map(m => ({
+              value: m,
+              label: m.split('/').pop(), // Simple label
+              description: `Provided by ${p.name}`
+            }));
+          });
         setModelOptions(options.length > 0 ? options : getDefaultOptions());
       } else {
         setModelOptions(getDefaultOptions());

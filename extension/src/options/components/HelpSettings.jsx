@@ -162,7 +162,7 @@ const HelpSettings = () => {
       action: () => setShowVideoModal(true)
     },
     { label: 'Community Forum', icon: 'Users', url: 'https://t.me/nova_gent' },
-    { label: 'GitHub Repository', icon: 'Github', url: 'https://github.com/manojkumarfade' },
+    { label: 'GitHub Repository', icon: 'Github', url: 'https://github.com/manojkumarfade/NOVA' },
     { label: 'Live Chat Support', icon: 'MessageCircle', url: 'https://t.me/nova_gent' }
   ];
 
@@ -390,7 +390,7 @@ const HelpSettings = () => {
               </Button>
             </div>
 
-            <div className="overflow-y-auto p-4 md:p-6 prose prose-sm md:prose-base dark:prose-invert max-w-none">
+            <div className="overflow-y-auto p-6 md:p-8 prose prose-base md:prose-lg dark:prose-invert max-w-none">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {novaManualContent}
               </ReactMarkdown>

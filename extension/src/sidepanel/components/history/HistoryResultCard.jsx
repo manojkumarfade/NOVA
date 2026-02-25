@@ -1,15 +1,22 @@
+/**
+ * @file HistoryResultCard.jsx
+ * @description Core functionality for HistoryResultCard.
+ * Handles the primary logic and responsibilities designated for this module.
+ * 
+ * @context Sidepanel UI Component (React)
+ */
+
 import React from 'react';
 import Icon from '../../../shared/components/AppIcon';
-import Image from '../../../shared/components/AppImage';
 import Button from '../../../shared/components/ui/Button';
 
-const HistoryResultCard = ({ 
+const HistoryResultCard = ({
   result,
   onVisit,
   onBookmark,
   onShare,
   onExplain,
-  className = '' 
+  className = ''
 }) => {
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
@@ -36,7 +43,7 @@ const HistoryResultCard = ({
       <div className="flex flex-col md:flex-row gap-4 p-4 md:p-6">
         {result?.thumbnail && (
           <div className="w-full md:w-32 h-32 md:h-24 flex-shrink-0 overflow-hidden rounded-md bg-muted">
-            <Image
+            <img
               src={result?.thumbnail}
               alt={result?.thumbnailAlt}
               className="w-full h-full object-cover"

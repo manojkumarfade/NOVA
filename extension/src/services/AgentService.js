@@ -1,3 +1,11 @@
+/**
+ * @file AgentService.js
+ * @description Core functionality for AgentService.
+ * Handles the primary logic and responsibilities designated for this module.
+ * 
+ * @context Core Service (Background/Agent Logic provider)
+ */
+
 
 import { navigator } from '../agents/Navigator';
 import { LLMClient } from './LLMClient';
@@ -5,8 +13,10 @@ import { Observer } from './Observer';
 import { ImageAgent } from '../agents/ImageAgent';
 import { StorageService } from './StorageService';
 import { SearchService } from './SearchService';
+import { SwarmService } from './SwarmService';
 import { IntentDetector } from './IntentDetector';
 import { ShoppingService } from './ShoppingService';
+import { VisionService } from './VisionService';
 // import { personaManager } from './voice/PersonaManager';
 import { recoveryEngine } from '../MACHINE_LEARNING/RecoveryEngine';
 import { siteMemory } from '../MACHINE_LEARNING/SiteMemory';
@@ -24,14 +34,20 @@ class AgentService {
             chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 if (request.type === 'START_AGENT_TASK') {
                     // Start with passed flags (isWebSearchEnabled, isShoppingMode, history, isImageGen)
-                    this.runTask(request.prompt, request.history || [], request.isAgentic, request.isWebSearchEnabled, request.isShoppingMode || false, request.isImageGen || false, (data) => {
+                    this.runTask(request.prompt, request.history || [], request.isAgentic, request.isWebSearchEnabled, request.isShoppingMode || false, request.isImageGen || false, request.imageAttachments || [], (data) => {
                         chrome.runtime.sendMessage({
                             type: 'AGENT_PROGRESS',
                             data
                         }).catch(() => { });
                     });
-                } else if (request.type === 'STOP_AGENT') {
+                    sendResponse({ status: 'started' });
+                    return true;
+                } else if (request.type === 'STOP_AGENT_TASK') {
                     this.handleStop();
+                    // [FIX] Force-detach debugger so the debugging banner disappears
+                    navigator.detach().catch(() => { });
+                    sendResponse({ status: 'stopped' });
+                    return true;
                 } else if (request.type === 'CONFIRM_ACTION') {
                     this.handleConfirmation(true);
                 } else if (request.type === 'REJECT_ACTION') {
@@ -39,6 +55,22 @@ class AgentService {
                 } else if (request.type === 'ENHANCE_PROMPT') {
                     this.enhancePrompt(request.prompt).then(data => sendResponse(data));
                     return true; // Async response
+                } else if (request.type === 'PROCESS_VOICE_COMMAND') {
+                    this.processVoiceCommand(request.prompt, request.history).then(data => sendResponse(data));
+                    return true;
+                } else if (request.type === 'GENERATE_TITLE') {
+                    this.generateConversationTitle(request.messages).then(data => sendResponse(data));
+                    return true;
+                } else if (request.type === 'START_CART_AUTOMATION') {
+                    ShoppingService.startCartAutomation(request.url, (data) => {
+                        chrome.runtime.sendMessage({ type: 'AGENT_PROGRESS', data }).catch(() => { });
+                    }).then(data => sendResponse(data));
+                    return true;
+                } else if (request.type === 'FLASH_COMPARE') {
+                    ShoppingService.comparePrices(request.url, request.name, (data) => {
+                        chrome.runtime.sendMessage({ type: 'AGENT_PROGRESS', data }).catch(() => { });
+                    }).then(data => sendResponse(data));
+                    return true;
                 }
             });
         }
@@ -76,6 +108,24 @@ class AgentService {
         }
     }
 
+    async generateConversationTitle(messages) {
+        try {
+            const snippet = messages.slice(0, 4).map(m =>
+                `${m.role === 'user' ? 'User' : 'AI'}: ${m.content?.slice(0, 120) || ''}`
+            ).join('\n');
+
+            const title = await LLMClient.chatCompletion([
+                { role: 'system', content: 'Generate a SHORT title (5-8 words max) summarizing this conversation. Return ONLY the title text, no quotes, no punctuation at the end.' },
+                { role: 'user', content: snippet }
+            ], null, { temperature: 0.3 });
+
+            return { title: title?.trim()?.slice(0, 60) || 'Untitled Chat' };
+        } catch (e) {
+            console.error('Title generation failed', e);
+            return { title: null };
+        }
+    }
+
     handleConfirmation(approved) {
         if (this.confirmationResolver) {
             this.confirmationResolver(approved);
@@ -108,8 +158,62 @@ class AgentService {
         }
     }
 
-    async runTask(userRequest, history, isAgentic, isWebSearchEnabled, isShoppingMode, isImageGen, onProgress) {
-        console.log('AgentService: Starting Task', userRequest, 'History Len:', history.length, 'Img:', isImageGen);
+    async processVoiceCommand(userPrompt, history) {
+        try {
+            const currentDate = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+
+            const systemPrompt = `
+            You are Nova, an Advanced Voice Assistant.
+            Current Date: ${currentDate}
+            
+            ROLE:
+            - You are a CONVERSATIONAL assistant.
+            - Your responses are SPOKEN aloud. 
+            - BE CONCISE (max 2-3 sentences unless asked for detail). 
+            - Use natural, spoken language.
+            - Do not use markdown tables or complex formatting.
+            - ANSWER from your own knowledge. DO NOT SEARCH THE WEB.
+            - If you don't know, say you don't know.
+
+            OUTPUT FORMAT:
+            Just your spoken response text.
+            `;
+
+            const chatHistory = history.slice(-6).map(m => ({ role: m.role || (m.sender === 'user' ? 'user' : 'assistant'), content: m.message }));
+
+            const messages = [
+                { role: 'system', content: systemPrompt },
+                ...chatHistory,
+                { role: 'user', content: userPrompt }
+            ];
+
+            const response = await LLMClient.chatCompletion(messages, null, { temperature: 0.7 });
+
+            // Simple Navigation Handling
+            if (response.includes('{"action": "NAVIGATE"')) {
+                try {
+                    const clean = response.replace(/```json/g, '').replace(/```/g, '').trim();
+                    const jsonStart = clean.indexOf('{');
+                    const jsonEnd = clean.lastIndexOf('}');
+                    if (jsonStart !== -1 && jsonEnd !== -1) {
+                        const action = JSON.parse(clean.substring(jsonStart, jsonEnd + 1));
+                        if (action.action === 'NAVIGATE' && action.url) {
+                            chrome.tabs.update({ url: action.url });
+                            return { message: `Opening ${action.url}`, action: 'NAVIGATE' };
+                        }
+                    }
+                } catch (e) { console.warn("Voice Nav Parse Error", e); }
+            }
+
+            return { message: response.replace(/[\*#_`~]/g, '') };
+        } catch (error) {
+            console.error("Voice Processing Failed", error);
+            return { message: "I'm having trouble processing that right now." };
+        }
+    }
+
+    async runTask(userRequest, history, isAgentic, isWebSearchEnabled, isShoppingMode, isImageGen, imageAttachments, onProgress) {
+        console.log('AgentService: Starting Task', userRequest, 'History Len:', history.length, 'Img:', isImageGen, 'Attached Images:', imageAttachments?.length || 0);
         this.abortController = new AbortController();
         const signal = this.abortController.signal;
 
@@ -144,71 +248,192 @@ class AgentService {
                 } catch (err) {
                     console.error("Image Gen Failed:", err);
                     onProgress({
-                        status: 'completed', // Complete with error message instead of 'error' state to keep chat flow
+                        status: 'completed',
                         result: { message: `Failed to generate image: ${err.message}. Please check your API Key in Settings.` }
                     });
                 }
                 return;
             }
 
-            // 1. STRICT MODE ENFORCEMENT (Simple Mode)
-            if (!isAgentic && !isWebSearchEnabled && !isShoppingMode) {
+            // 1. STRICT MODE ENFORCEMENT (Simple Mode / Greetings)
+            if (!isShoppingMode && (!isAgentic && !isWebSearchEnabled)) {
                 // ... (Strict checks)
                 // ...
-                onProgress({ status: 'thinking', message: 'Generating response...' });
+                onProgress({
+                    status: 'thinking',
+                    message: 'Generating response...',
+                    logEntry: {
+                        type: 'thought',
+                        message: '💭 Processing your message...',
+                        timestamp: new Date().toLocaleTimeString()
+                    }
+                });
+
+                // Build the user message - use multi-part if images are attached
+                const hasImages = imageAttachments && imageAttachments.length > 0;
+                let userContent;
+
+                if (hasImages) {
+                    // Construct a vision message with text + images
+                    userContent = [
+                        { type: 'text', text: userRequest }
+                    ];
+                    for (const imgDataUrl of imageAttachments) {
+                        userContent.push({
+                            type: 'image_url',
+                            image_url: { url: imgDataUrl }
+                        });
+                    }
+                    console.log(`[AgentService] Vision message: ${imageAttachments.length} image(s) attached`);
+                } else {
+                    userContent = userRequest;
+                }
+
+                const systemPrompt = hasImages
+                    ? `You are Nova, a helpful AI assistant with VISION capabilities. Current Date: ${currentDate}. The user has attached image(s). Analyze them thoroughly — describe what you see, answer questions about the content, read any text in the image, and provide detailed insights. Be specific and helpful.`
+                    : `You are Nova, a helpful AI assistant. Current Date: ${currentDate}. Maintain conversation context.`;
 
                 // Use History for Context
                 const messages = [
-                    { role: 'system', content: `You are Nova, a helpful AI assistant. Current Date: ${currentDate}. Maintain conversation context.` },
+                    { role: 'system', content: systemPrompt },
                     ...history,
-                    { role: 'user', content: userRequest }
+                    { role: 'user', content: userContent }
                 ];
 
                 const response = await LLMClient.chatCompletion(messages);
                 checkStop();
-                onProgress({ status: 'completed', message: 'Response ready', result: { message: response } });
+                onProgress({
+                    status: 'completed',
+                    message: 'Response ready',
+                    result: { message: response }
+                });
                 return;
             }
 
-            // 2. WEB SEARCH MODE
+            // 2. AGENTIC / SHOPPING MODE
+            if (isAgentic || isShoppingMode) {
+                await this.startAgenticTask(userRequest, history, isAgentic, isShoppingMode, onProgress, signal, checkStop);
+                return;
+            }
+
+            // 3. WEB SEARCH MODE (Deep Research — 6-Tab Swarm)
             if (isWebSearchEnabled) {
-                onProgress({ status: 'planning', message: 'Searching web...' });
+                onProgress({
+                    status: 'planning',
+                    message: 'Deep Research: Searching web & opening background tabs...',
+                    logEntry: { type: 'plan', message: 'Starting deep research swarm', timestamp: new Date().toLocaleTimeString() }
+                });
                 const searchResults = await SearchService.search(userRequest);
 
-                let searchContext = "No results found.";
-                if (searchResults.length > 0) {
-                    searchContext = searchResults.map((r, i) => `${i + 1}. [${r.title}](${r.link}): ${r.snippet}`).join('\n');
+                if (searchResults.length === 0) {
+                    onProgress({ status: 'completed', result: { message: 'No search results found for your query.' } });
+                    return;
                 }
-                onProgress({ status: 'thinking', message: 'Synthesizing answer...' });
+
+                // Deep Research: Open top 6 results as background tabs
+                const topUrls = searchResults.slice(0, 6).map(r => r.link);
+
+                onProgress({
+                    status: 'navigating',
+                    message: `Opening ${topUrls.length} research tabs...`,
+                    logEntry: { type: 'navigate', message: `Spawning ${topUrls.length} research tabs`, timestamp: new Date().toLocaleTimeString() }
+                });
+
+                // DOM content extractor
+                const contentExtractor = () => {
+                    try {
+                        const article = document.querySelector('article') || document.querySelector('main') || document.body;
+                        const text = article.innerText || '';
+                        // Clean and truncate
+                        const cleaned = text.replace(/\s+/g, ' ').substring(0, 8000);
+                        return {
+                            url: window.location.href,
+                            title: document.title,
+                            content: cleaned,
+                            length: cleaned.length
+                        };
+                    } catch (e) {
+                        return { url: window.location.href, title: document.title, content: '', error: e.message };
+                    }
+                };
+
+                let combinedContent = '';
+                try {
+                    const tabResults = await SwarmService.spawnWithConcurrency(
+                        topUrls,
+                        contentExtractor,
+                        3,      // 3 concurrent
+                        20000,  // 20s timeout
+                        (tabIndex, status, data) => {
+                            const title = searchResults[tabIndex]?.title || `Tab ${tabIndex + 1}`;
+                            onProgress({
+                                status: status === 'extracting' ? 'thinking' : 'navigating',
+                                message: `${title.substring(0, 40)}...: ${status === 'loading' ? '🔄 Loading' : status === 'extracting' ? '🧠 Reading' : status === 'done' ? '✅ Done' : '❌ Failed'}`,
+                                logEntry: {
+                                    type: status === 'extracting' ? 'think' : 'navigate',
+                                    message: `${title.substring(0, 50)}: ${status}`,
+                                    url: data?.url || '',
+                                    timestamp: new Date().toLocaleTimeString()
+                                }
+                            });
+                        }
+                    );
+
+                    // Combine successful extractions
+                    const validExtractions = tabResults.filter(r => r.status === 'success' && r.result?.content?.length > 100);
+                    combinedContent = validExtractions.map(r =>
+                        `=== SOURCE: ${r.result.title} (${r.result.url}) ===\n${r.result.content}`
+                    ).join('\n\n');
+
+                    onProgress({
+                        status: 'thinking',
+                        message: `Synthesizing from ${validExtractions.length} sources...`,
+                        logEntry: { type: 'think', message: `Read ${validExtractions.length} pages, synthesizing`, timestamp: new Date().toLocaleTimeString() }
+                    });
+                } catch (e) {
+                    console.warn('[Agent] Swarm research failed, falling back to snippets', e);
+                    combinedContent = searchResults.map((r, i) => `${i + 1}. [${r.title}](${r.link}): ${r.snippet}`).join('\n');
+                }
+
+                // If swarm got nothing, fall back to snippets
+                if (!combinedContent || combinedContent.length < 200) {
+                    combinedContent = searchResults.map((r, i) => `${i + 1}. [${r.title}](${r.link}): ${r.snippet}`).join('\n');
+                }
+
                 const summaryPrompt = `
                 User Question: "${userRequest}"
                 Current Date: ${currentDate}
                 
-                Web Search Results:
-                ${searchContext}
+                Research Data (from ${SwarmService.getOpenTabs().length} background tabs):
+                ${combinedContent}
 
                 Instructions:
-                - Answer the user's question based ONLY on the search results.
-                - PRIORITIZE results from ${new Date().getFullYear()}.
-                - IMPORTANT: Ignore your internal training data cut-off. TRUST the Search Results dates.
-                - Provide citations if possible (e.g. [Source Title]).
-                - Be concise and helpful.
+                - Provide a comprehensive, well-structured answer based on the research data.
+                - PRIORITIZE information from ${new Date().getFullYear()}.
+                - Include citations with source names.
+                - Be thorough but organized with clear sections.
                 - DO NOT USE MARKDOWN TABLES. Use bulleted lists or bold text.
                 `;
 
                 const response = await LLMClient.chatCompletion([
-                    { role: 'system', content: `You are Nova, a helpful research assistant. Current Date: ${currentDate}` },
+                    { role: 'system', content: `You are Nova, a deep research assistant. Current Date: ${currentDate}. You have access to ${SwarmService.getOpenTabs().length} open research tabs.` },
                     { role: 'user', content: summaryPrompt }
                 ]);
-                // ...
                 checkStop();
-                onProgress({ status: 'completed', message: 'Search Completed', result: { message: response } });
+                onProgress({
+                    status: 'completed',
+                    message: 'Deep Research Complete',
+                    result: {
+                        message: response,
+                        taskSummary: {
+                            type: 'web_research',
+                            tabsOpened: topUrls.length,
+                            tabsAlive: SwarmService.getOpenTabs().length,
+                            sourcesUsed: topUrls.length,
+                        }
+                    }
+                });
                 return;
-            }
-
-            // 3. AGENTIC / SHOPPING MODE
-            if (isAgentic || isShoppingMode) {
-                await this.startAgenticTask(userRequest, history, isAgentic, isShoppingMode, onProgress, signal, checkStop);
             }
 
         } catch (error) {
@@ -304,7 +529,7 @@ class AgentService {
     async runNavigatorLoop(userRequest, historyParam, tab, initialState, onProgress, signal, checkStop, isShoppingMode) {
         let isFinished = false;
         let history = []; // Internal Action History
-        const maxTurns = 40; // [UPDATED] Increased from 25 to 40 to prevent early timeouts during deep research
+        const maxTurns = 40; // Standard turn limit
         let turnCount = 0;
         let lastUrl = "";
         let state = initialState;
@@ -341,148 +566,55 @@ class AgentService {
         */
 
         if (isShoppingMode) {
-            // [NEW] Consultation Check: If user asks about *this* page/product, default to standard Agent functionality (reading page)
-            // instead of triggering a full "Universe Build" search.
-            const isConsultation = /(this|current|here|page)/i.test(userRequest) &&
-                /(good|bad|worth|review|think|opinion|best)/i.test(userRequest);
+            try {
+                const forceSearch = userRequest === "PROCEED_TO_WEB_SEARCH";
+                checkStop(); // Ensure we don't start if already stopped
+                const shoppingResult = await ShoppingService.process(userRequest, onProgress, '', forceSearch, signal, checkStop);
 
-            if (isConsultation) {
-                console.log("[AgentService] Consultation Intent Detected. Skipping Deep Shopping Search to chat with Page.");
-                history.push("System: User asked for consultation on current page. Switched to Page-Aware Answer Mode.");
-
-                // [FAST PATH] Immediate Page Read & Answer (No Navigation Loop)
-                onProgress({ status: 'thinking', message: 'Reading page content...' });
-                try {
-                    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-                    const results = await chrome.scripting.executeScript({
-                        target: { tabId: tab.id },
-                        func: Observer.getBrowserState
-                    });
-
-                    if (results && results[0] && results[0].result) {
-                        const pageContent = results[0].result.textContext;
-
-                        onProgress({ status: 'thinking', message: 'Analyzing page...' });
-                        const consultPrompt = `
-                        User Question: "${userRequest}"
-                        Role: You are an expert shopping assistant.
-                        Context: The user is currently looking at a webpage.
-                        Page Content:
-                        ${pageContent.substring(0, 15000)}
-
-                        Task: Answer the user's question directly based on the page content.
-                        - If asking "Is this good?", summarize pros/cons from the page.
-                        - If asking for specs, extract them.
-                        - Be concise and helpful.
-                        `;
-
-                        const response = await LLMClient.chatCompletion([
-                            { role: 'system', content: `You are Nova. Current Date: ${new Date().toLocaleDateString()}` },
-                            { role: 'user', content: consultPrompt }
-                        ]);
-
-                        onProgress({
-                            status: 'completed',
-                            message: 'Consultation Complete',
-                            result: { message: response }
-                        });
-                        return; // [STOP] Do not fall through to loop
-                    }
-                } catch (e) {
-                    console.error("Consultation Fast-Path failed:", e);
-                    // Fall through to standard loop if fast path fails
-                }
-            } else {
-                try {
-                    const shoppingResult = await ShoppingService.process(userRequest, onProgress);
-
-                    if (shoppingResult.results && shoppingResult.results.length > 0) {
-                        const topPick = shoppingResult.results[0];
-
-                        // 1. RICH SUMMARY
-                        let summary = `## 🏆 Recommendation: ${topPick.product.name}\n\n`;
-                        summary += `> ${topPick.product.reason || 'Best overall choice.'}\n\n`;
-
-                        if (topPick.product.features && topPick.product.features.length) {
-                            summary += `**Key Features:**\n${topPick.product.features.map(f => `- ${f}`).join('\n')}\n\n`;
-                        }
-
-                        summary += `### 💰 Best Deal\n`;
-                        summary += `**₹${topPick.bestDeal.basePrice}** at ${topPick.bestDeal.site} ${topPick.bestDeal.stock ? '✅' : '⚠️'}\n`;
-
-                        // [NEW] Show Other Store Prices for the WINNER
-                        if (topPick.alternatives && topPick.alternatives.length > 0) {
-                            summary += `*Also available at:*\n`;
-                            topPick.alternatives.forEach(alt => {
-                                summary += `- ₹${alt.basePrice} (${alt.site})\n`;
-                            });
-                        } else {
-                            summary += `*(Best price found across major stores)*\n`;
-                        }
-
-                        // 2. ACTION PROMPTS
-                        summary += `\n**What would you like to do?**\n`;
-                        summary += `1. **[Add to Cart by saying "Add this to cart"]**\n`;
-                        summary += `2. [View Deal](${topPick.bestDeal.link})\n\n`;
-
-                        // 3. ALTERNATIVE PRODUCTS (Competitive Landscape)
-                        if (shoppingResult.results.length > 1) {
-                            summary += `### ⚖️ Alternative Models\n`;
-                            shoppingResult.results.slice(1, 4).forEach(res => {
-                                summary += `**${res.product.name}**\n`;
-                                summary += `- Best Price: ₹${res.bestDeal.basePrice} (${res.bestDeal.site})\n`;
-                                summary += `- ${res.product.reason ? res.product.reason.substring(0, 60) + '...' : ''}\n`;
-                                if (res.bestDeal.link) {
-                                    summary += `[View Deal](${res.bestDeal.link})\n\n`;
-                                } else {
-                                    summary += `\n`;
-                                }
-                            });
-                        }
-
-                        history.push(`System: Shopping Completed. ${summary}`);
-
-                        // 4. AUTO-REDIRECT
-                        if (topPick.bestDeal.link && topPick.bestDeal.link.startsWith('http')) {
-                            onProgress({ status: 'navigating', message: `🚀 Redirecting to best deal for ${topPick.product.name}...` });
-                            try {
-                                if (typeof chrome !== 'undefined' && chrome.tabs) {
-                                    chrome.tabs.update({ url: topPick.bestDeal.link });
-                                }
-                            } catch (err) { }
-                        }
-
-                        onProgress({
-                            status: 'completed',
-                            message: 'Shopping Task Completed. Say "Add to cart" to proceed.',
-                            result: {
-                                message: summary,
-                                data: shoppingResult,
-                                autoRedirect: topPick.bestDeal.link
-                            }
-                        });
-                        return; // Task Done
-                    } else {
-                        onProgress({
-                            status: 'completed',
-                            message: 'Shopping Completed',
-                            result: { message: shoppingResult.message || "No results found." }
-                        });
-                        return;
-                    }
-                } catch (e) {
-                    console.error("Shopping Engine Failed", e);
-                    onProgress({ status: 'error', message: `Shopping Error: ${e.message}` });
+                if (!shoppingResult) {
+                    onProgress({ status: 'completed', message: 'Shopping canceled or no result.' });
                     return;
                 }
-            } // Close Consultation check else block
-        }
 
+                if (!shoppingResult.isShopping) {
+                    onProgress({
+                        status: 'completed',
+                        message: 'Need clarification...',
+                        result: {
+                            message: shoppingResult.message,
+                            isShopping: false,
+                            needsProceed: shoppingResult.needsProceed || false,
+                            extraData: shoppingResult.extraData || null
+                        }
+                    });
+                    return;
+                }
+
+                if (shoppingResult.isShopping) {
+                    onProgress({
+                        status: 'completed',
+                        message: 'Shopping Task Completed.',
+                        result: {
+                            message: shoppingResult.message,
+                            isShopping: true,
+                            products: shoppingResult.products,
+                            winnerProduct: shoppingResult.winnerProduct,
+                            winnerUrl: shoppingResult.winnerUrl
+                        }
+                    });
+                    return;
+                }
+            } catch (e) {
+                console.error("Shopping Engine Failed", e);
+                onProgress({ status: 'error', message: `Shopping Error: ${e.message}` });
+                return;
+            }
+        }
 
 
         // SYSTEM PROMPT FOR BEST PRODUCT FINDER (SMART SHOPPER)
         const navigatorSystemPrompt = `
-You are Nova, a Smart Shopping Agent & Researcher (Navigator).
+You are Nova, a Smart Shopping Agent & Researcher (Navigator) with VISION capabilities.
 Current Date: ${currentDate}
 User Goal: "${userRequest}"
 
@@ -518,10 +650,6 @@ OUTPUT FORMAT (JSON ONLY):
             checkStop();
             turnCount++;
 
-            checkStop();
-            turnCount++;
-
-            // [REMOVED] Hard Stop if Media is Playing (Caused issues with Summarization tasks)
             // The agent should use its System Prompt to decide whether to stop or continue research.
             /*
             if (state.media?.isPlaying && turnCount > 2) {
@@ -544,10 +672,12 @@ OUTPUT FORMAT (JSON ONLY):
 
             // Update State
             if (turnCount > 1 || !state.url) {
-                // [NEW] Re-enable overlay if navigation happened or just in case
-                try {
-                    chrome.tabs.sendMessage(tab.id, { type: 'ENABLE_DOM_OVERLAY' }).catch(() => { });
-                } catch (e) { }
+                // [OPTIMIZED] Only re-enable overlay if URL changed (avoids flicker)
+                if (lastUrl !== state?.url) {
+                    try {
+                        chrome.tabs.sendMessage(tab.id, { type: 'ENABLE_DOM_OVERLAY' }).catch(() => { });
+                    } catch (e) { }
+                }
 
                 onProgress({ status: 'navigating', message: `Scanning... (Turn ${turnCount})` });
                 try {
@@ -619,7 +749,8 @@ OUTPUT FORMAT (JSON ONLY):
                                     eid: i.attributes?.eId || '' // Include Element ID in Prompt
                                 };
                                 if (i.tagName === 'input' || i.tagName === 'textarea') {
-                                    item.v = i.attributes?.value || '';
+                                    item.v = i.attributes?.value ?? '';
+                                    item.placeholder = i.attributes?.placeholder || '';
                                 }
                                 return item;
                             });
@@ -631,15 +762,27 @@ OUTPUT FORMAT (JSON ONLY):
 
             RULES:
             1. IF INPUT HAS TEXT (v="nike.com") AND YOU WANT TO SEARCH, CLICK SEARCH BUTTON.
-            2. IF INPUT IS EMPTY, TYPE.
-            3. IF "Go to X", USE NAVIGATE ACTION.
-            4. LOOP PREVENTION: If you clicked an ID (e.g. 23) in the last step and URL did NOT change, DO NOT CLICK IT AGAIN. Scroll or try another.
-            5. EXPLORE: If looking for "best" or "under X", SCROLL at least twice to see options before choosing.
-            6. YOUTUBE TIP: PRIORITIZE clicking elements with eid='video-title' or eid='thumbnail' or href='/watch...'. Avoid generic 'More actions' buttons.
-            7. **MEDIA AWARENESS**: IF MEDIA STATE IS 'PLAYING':
+            2. IF INPUT IS EMPTY (v=""), TYPE into it.
+            3. IF INPUT ALREADY HAS A VALUE (v is not empty), DO NOT TYPE INTO IT AGAIN. MOVE TO THE NEXT EMPTY FIELD.
+            4. IF "Go to X", USE NAVIGATE ACTION.
+            5. LOOP PREVENTION: If you clicked an ID (e.g. 23) in the last step and URL did NOT change, DO NOT CLICK IT AGAIN. Scroll or try another.
+            6. EXPLORE: If looking for "best" or "under X", SCROLL at least twice to see options before choosing.
+            7. YOUTUBE TIP: PRIORITIZE clicking elements with eid='video-title' or eid='thumbnail' or href='/watch...'. Avoid generic 'More actions' buttons.
+            8. **MEDIA AWARENESS**: IF MEDIA STATE IS 'PLAYING':
                (A) IF GOAL IS "PLAY/WATCH/LISTEN": OUTPUT ACTION "FINISH".
                (B) IF GOAL IS "RESEARCH/SUMMARIZE/FIND BEST": IGNORE PLAYBACK, EXTRACT INFO, AND NAVIGATE TO NEXT RESULT. DO NOT CLICK PAUSE.
-            8. **SHOPPING ACTIONS**:
+            9. **FORM FILLING**: When filling multiple fields:
+               - Fill fields ONE BY ONE, in order (top to bottom).
+               - After typing into a field, IMMEDIATELY move to the NEXT empty field. Check its 'v' property.
+               - If 'v' already has a value, SKIP that field.
+               - NEVER re-type into a field that already has a value.
+               - When a search bar is filled, add "submit": true to the action to press Enter.
+               - When ALL fields are filled, use ANSWER to report completion.
+            10. **CODE EDITORS**: If you see an element with tag "editor" (type: code-editor):
+               - Use TYPE with its ID and value containing the code to write.
+               - The system will handle focusing and inserting code automatically.
+               - Write COMPLETE code, not partial snippets.
+            11. **SHOPPING ACTIONS**:
                - **"Add to Cart"**: You MUST find a button with text "Add to Cart", "Add to Bag", or "Buy Now" and **CLICK** it. **DO NOT** NAVIGATE to the cart page (like /cart or /checkout) unless the item is *already* added.
                - **"Checkout"**: Only THEN navigate to the cart/checkout page.
             
@@ -669,12 +812,12 @@ OUTPUT FORMAT (JSON ONLY):
                     llmResponse = await LLMClient.chatCompletion([
                         { role: 'system', content: navigatorSystemPrompt },
                         { role: 'user', content: prompt }
-                    ], null, { temperature: 0.1, signal: signal }); // [NEW] Pass signal
+                    ], null, { temperature: 0.1, signal: signal });
                 } catch (e) {
                     console.error("LLM Request Failed:", e);
                     history.push(`System: LLM Error(${e.message}).Retrying...`);
-                    // [NEW] Abortable Wait
-                    await this.wait(2000, signal);
+                    // [NEW] Abortable Wait - reduced from 2000ms
+                    await this.wait(500, signal);
                     continue; // Retry loop
                 }
 
@@ -682,41 +825,52 @@ OUTPUT FORMAT (JSON ONLY):
 
                 let action;
                 try {
-                    // Robust JSON Extraction Strategy (Brace Counting)
+                    // Robust JSON Extraction Strategy (Brace Counting & Pre-cleaning)
                     const extractJSON = (str) => {
-                        let startIndex = str.indexOf('{');
-                        if (startIndex === -1) return null;
+                        if (!str) return null;
 
-                        let braceCount = 0;
-                        let foundStart = false;
-                        let endIndex = -1;
-
-                        for (let i = startIndex; i < str.length; i++) {
-                            if (str[i] === '{') {
-                                braceCount++;
-                                foundStart = true;
-                            } else if (str[i] === '}') {
-                                braceCount--;
-                            }
-
-                            if (foundStart && braceCount === 0) {
-                                endIndex = i;
-                                break;
-                            }
+                        // Clean up markdown block if present
+                        let cleanStr = str;
+                        if (cleanStr.includes('```json')) {
+                            cleanStr = cleanStr.replace(/```json/gi, '').replace(/```/g, '');
+                        } else if (cleanStr.includes('```')) {
+                            cleanStr = cleanStr.replace(/```/g, '');
                         }
 
-                        if (endIndex !== -1) {
-                            return str.substring(startIndex, endIndex + 1);
+                        // Try finding the first '{' and the last '}'
+                        const firstBrace = cleanStr.indexOf('{');
+                        const lastBrace = cleanStr.lastIndexOf('}');
+
+                        if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+                            let potentialJson = cleanStr.substring(firstBrace, lastBrace + 1);
+
+                            // Attempt to fix common LLM JSON errors before parsing
+                            try {
+                                // 1. Remove trailing commas before closing braces
+                                potentialJson = potentialJson.replace(/,\s*}/g, '}');
+                                // 2. Remove trailing commas before closing brackets
+                                potentialJson = potentialJson.replace(/,\s*\]/g, ']');
+                                // 3. Fix unescaped newlines within strings (basic attempt)
+                                potentialJson = potentialJson.replace(/\\n/g, '\\\\n');
+
+                                return JSON.parse(potentialJson);
+                            } catch (e) {
+                                console.warn("AgentService: First JSON parse pass failed, trying regex fallback.", e.message);
+                                // If standard parse fails, it might be the "Expected double-quoted property name" error.
+                                // We rely on the LLM to format the keys correctly, but sometimes it doesn't.
+                                // Let the catch block handle the complete failure.
+                                throw e;
+                            }
                         }
+                        return null;
                         return null;
                     };
 
-                    const jsonStr = extractJSON(llmResponse);
-                    if (!jsonStr) throw new Error("No JSON found in response");
+                    action = extractJSON(llmResponse);
 
-                    // Clean markdown code blocks just in case they are inside the string (unlikely but safe)
-                    const cleanJson = jsonStr.replace(/```json/g, '').replace(/```/g, '').trim();
-                    action = JSON.parse(cleanJson);
+                    if (!action) {
+                        throw new Error("No JSON found in response.");
+                    }
 
                     // Validate Schema
                     if ((action.action === 'CLICK' || action.action === 'TYPE') && (action.id === undefined || action.id === null)) {
@@ -736,9 +890,27 @@ OUTPUT FORMAT (JSON ONLY):
 
                 history.push(`${action.action}: ${action.thought} `);
 
+                // Send the LLM's thinking as a log entry for the reasoning box
+                if (action.thought) {
+                    onProgress({
+                        status: 'thinking',
+                        message: action.thought,
+                        logEntry: {
+                            type: 'thought',
+                            message: `💭 ${action.thought}`,
+                            timestamp: new Date().toLocaleTimeString()
+                        }
+                    });
+                }
+
                 onProgress({
                     status: 'navigating',
-                    message: action.thought || `Executing ${action.action}...`
+                    message: action.thought || `Executing ${action.action}...`,
+                    logEntry: {
+                        type: 'navigate',
+                        message: `${action.action}: ${action.value || action.text || `ID ${action.id}`}`,
+                        timestamp: new Date().toLocaleTimeString()
+                    }
                 });
 
                 checkStop();
@@ -764,7 +936,7 @@ OUTPUT FORMAT (JSON ONLY):
 
                     if (isSameAction && isSameUrl) {
                         console.warn("AgentService: Loop detected, blocking duplicate action.");
-                        history.push(`System: You just executed '${action.action}' on ID ${action.id} and nothing changed. You MUST do something different (e.g. SCROLL or click a different element).`);
+                        history.push(`System: You just executed '${action.action}' on ID ${action.id} and nothing changed.You MUST do something different(e.g.SCROLL or click a different element).`);
                         continue; // Skip execution, force re-think
                     }
 
@@ -785,8 +957,9 @@ OUTPUT FORMAT (JSON ONLY):
 
                     try {
                         await hybridCore.executeAction(action, state.interactives, tab.id);
-                        // [OPTIMIZED] Reduced wait from 2500ms to 800ms for speed.
-                        await this.wait(800, signal);
+                        // [OPTIMIZED] Shorter wait for TYPE/CLICK, longer for NAVIGATE.
+                        const waitTime = (action.action === 'NAVIGATE') ? 800 : 400;
+                        await this.wait(waitTime, signal);
 
                         // [NEW] RECOVERY ENGINE INTEGRATION
                         // 1. Fetch Fresh State
@@ -797,7 +970,7 @@ OUTPUT FORMAT (JSON ONLY):
 
                         if (!verification.success) {
                             console.warn("AgentService: Action Verification Failed", verification);
-                            history.push(`System: Action failed (${verification.reason}). Triggering Recovery...`);
+                            history.push(`System: Action failed(${verification.reason}).Triggering Recovery...`);
 
                             // 3. Trigger Recovery
                             try {
@@ -809,15 +982,15 @@ OUTPUT FORMAT (JSON ONLY):
                                     newState.textContext || ""
                                 );
 
-                                onProgress({ status: 'navigating', message: `Recovering: ${recoveryAction.thought}` });
-                                history.push(`System: Recovery Plan: ${recoveryAction.thought}`);
+                                onProgress({ status: 'navigating', message: `Recovering: ${recoveryAction.thought} ` });
+                                history.push(`System: Recovery Plan: ${recoveryAction.thought} `);
 
                                 // 4. Execute Fix Immediately
                                 await hybridCore.executeAction(recoveryAction, newState.interactives, tab.id);
                                 await this.wait(1000, signal);
                             } catch (recError) {
                                 console.error("Recovery Failed:", recError);
-                                history.push(`System: Recovery failed. Skipping step.`);
+                                history.push(`System: Recovery failed.Skipping step.`);
                             }
                         }
 
@@ -829,7 +1002,7 @@ OUTPUT FORMAT (JSON ONLY):
                         // simply tell the LLM it made a mistake and force a retry.
                         if (err.message.includes("Target element with ID") || err.message.includes("not found")) {
                             console.warn("AgentService: Element missing. Feeding back to LLM.");
-                            history.push(`System Error: ${err.message}. The element might have moved or is hidden. Please Check the 'INTERACTIVE ELEMENTS' list again and choose a valid ID.`);
+                            history.push(`System Error: ${err.message}. The element might have moved or is hidden.Please Check the 'INTERACTIVE ELEMENTS' list again and choose a valid ID.`);
                             continue; // Jump to next loop iteration (Refresh State -> Re-Prompt LLM)
                         }
 
@@ -845,7 +1018,7 @@ OUTPUT FORMAT (JSON ONLY):
                                 errState.url || "unknown",
                                 errState.textContext || ""
                             );
-                            history.push(`System: Exception caught. Recovery Plan: ${fix.thought}`);
+                            history.push(`System: Exception caught.Recovery Plan: ${fix.thought} `);
                             await hybridCore.executeAction(fix, errState.interactives, tab.id);
                             await this.wait(1000, signal);
                         } catch (recError) {
@@ -861,17 +1034,17 @@ OUTPUT FORMAT (JSON ONLY):
                 // Fallback Summary
                 const historyText = history.join("\n");
                 const summaryPrompt = `
-                You are Nova, the Navigator. You ran out of steps/time while trying to help the user.
+                You are Nova, the Navigator.You ran out of steps / time while trying to help the user.
                 User Goal: "${userRequest}"
 
                 Execution History:
                 ${historyText}
 
-                INSTRUCTIONS:
-                1. Summarize what you found so far.
-                2. If you found products/prices, list them.
+INSTRUCTIONS:
+1. Summarize what you found so far.
+                2. If you found products / prices, list them.
                 3. If you didn't find the exact answer, explain what you tried and suggest next steps.
-                4. Be helpful despite the cutoff.
+4. Be helpful despite the cutoff.
                 `;
 
                 try {
@@ -884,7 +1057,7 @@ OUTPUT FORMAT (JSON ONLY):
                         status: 'completed',
                         message: 'Task Timed Out (Summary Provided)',
                         result: {
-                            message: `**Time Limit Reached.**\n\nHere is a summary of what I found:\n\n${finalResponse}`
+                            message: `** Time Limit Reached.**\n\nHere is a summary of what I found: \n\n${finalResponse} `
                         }
                     });
                 } catch (e) {

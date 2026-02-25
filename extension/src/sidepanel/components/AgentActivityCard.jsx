@@ -1,3 +1,11 @@
+/**
+ * @file AgentActivityCard.jsx
+ * @description Core functionality for AgentActivityCard.
+ * Handles the primary logic and responsibilities designated for this module.
+ * 
+ * @context Sidepanel UI Component (React)
+ */
+
 import React from 'react';
 import Icon from '../../shared/components/AppIcon';
 
@@ -6,57 +14,52 @@ const AgentActivityCard = ({
   activity = '',
   progress = 0,
   status = 'active',
-  details = []
+  details = [],
+  logs = [],
+  modelName = '',
+  isShopping = false
 }) => {
   const [isExpanded, setIsExpanded] = React.useState(false);
+  const [showLogs, setShowLogs] = React.useState(false);
+  const logsEndRef = React.useRef(null);
+
   const agentConfig = {
-    planner: {
-      name: 'Planner Agent',
-      icon: 'Brain',
-      color: 'text-neon-cyan',
-      bgColor: 'bg-black/80 shadow-[inset_0_0_10px_rgba(6,182,212,0.2)]',
-      borderColor: 'border-neon-cyan/40'
-    },
-    navigator: {
-      name: 'Navigator Agent',
-      icon: 'Navigation',
-      color: 'text-neon-blue',
-      bgColor: 'bg-black/80 shadow-[inset_0_0_10px_rgba(59,130,246,0.2)]',
-      borderColor: 'border-neon-blue/40'
-    },
-    validator: {
-      name: 'Validator Agent',
-      icon: 'CheckCircle2',
-      color: 'text-neon-green',
-      bgColor: 'bg-black/80 shadow-[inset_0_0_10px_rgba(34,197,94,0.2)]',
-      borderColor: 'border-neon-green/40'
-    },
-    generating_image: {
-      name: 'Image Agent',
-      icon: 'Image',
-      color: 'text-neon-magenta',
-      bgColor: 'bg-black/80 shadow-[inset_0_0_10px_rgba(236,72,153,0.2)]',
-      borderColor: 'border-neon-magenta/40'
-    }
+    planner: { name: 'Planner Agent', icon: 'Brain', color: 'text-neon-cyan', bgColor: 'bg-black/80 shadow-[inset_0_0_10px_rgba(6,182,212,0.2)]', borderColor: 'border-neon-cyan/40' },
+    planning: { name: 'Planner Agent', icon: 'Brain', color: 'text-neon-cyan', bgColor: 'bg-black/80 shadow-[inset_0_0_10px_rgba(6,182,212,0.2)]', borderColor: 'border-neon-cyan/40' },
+    thinking: { name: 'Thinking Agent', icon: 'Brain', color: 'text-neon-violet', bgColor: 'bg-black/80 shadow-[inset_0_0_10px_rgba(139,92,246,0.2)]', borderColor: 'border-neon-violet/40' },
+    navigator: { name: 'Navigator Agent', icon: 'Navigation', color: 'text-neon-blue', bgColor: 'bg-black/80 shadow-[inset_0_0_10px_rgba(59,130,246,0.2)]', borderColor: 'border-neon-blue/40' },
+    navigating: { name: 'Navigator Agent', icon: 'Navigation', color: 'text-neon-blue', bgColor: 'bg-black/80 shadow-[inset_0_0_10px_rgba(59,130,246,0.2)]', borderColor: 'border-neon-blue/40' },
+    validator: { name: 'Validator Agent', icon: 'CheckCircle2', color: 'text-neon-green', bgColor: 'bg-black/80 shadow-[inset_0_0_10px_rgba(34,197,94,0.2)]', borderColor: 'border-neon-green/40' },
+    validating: { name: 'Validator Agent', icon: 'CheckCircle2', color: 'text-neon-green', bgColor: 'bg-black/80 shadow-[inset_0_0_10px_rgba(34,197,94,0.2)]', borderColor: 'border-neon-green/40' },
+    generating_image: { name: 'Image Agent', icon: 'Image', color: 'text-neon-magenta', bgColor: 'bg-black/80 shadow-[inset_0_0_10px_rgba(236,72,153,0.2)]', borderColor: 'border-neon-magenta/40' },
   };
 
   const config = agentConfig?.[agentType] || agentConfig?.planner;
 
+  const logTypeConfig = {
+    navigate: { icon: 'Navigation', color: 'text-neon-cyan' },
+    think: { icon: 'Brain', color: 'text-neon-violet' },
+    plan: { icon: 'FileText', color: 'text-neon-blue' },
+    click: { icon: 'MousePointer', color: 'text-green-400' },
+    type: { icon: 'Keyboard', color: 'text-yellow-400' },
+    scroll: { icon: 'ArrowDown', color: 'text-gray-400' },
+    validate: { icon: 'CheckCircle2', color: 'text-neon-green' },
+    image: { icon: 'Image', color: 'text-neon-magenta' },
+    error: { icon: 'AlertTriangle', color: 'text-red-400' },
+  };
+
+  // Auto-scroll logs
+  React.useEffect(() => {
+    if (showLogs && logsEndRef.current) {
+      logsEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [logs, showLogs]);
+
   return (
-    <div className={`
-      p-4 md:p-5 rounded-lg border ${config?.borderColor} ${config?.bgColor}
-      transition-all duration-300
-    `}>
+    <div className={`p-4 md:p-5 rounded-lg border ${config?.borderColor} ${config?.bgColor} transition-all duration-300`}>
       <div className="flex items-start gap-3 md:gap-4 mb-3">
-        <div className={`
-          flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center
-          ${config?.bgColor} border ${config?.borderColor}
-        `}>
-          <Icon
-            name={config?.icon}
-            size={24}
-            className={config?.color}
-          />
+        <div className={`flex-shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center ${config?.bgColor} border ${config?.borderColor}`}>
+          <Icon name={config?.icon} size={24} className={config?.color} />
         </div>
 
         <div className="flex-1 min-w-0">
@@ -85,7 +88,7 @@ const AgentActivityCard = ({
         </div>
       </div>
 
-      {progress > 0 && (
+      {progress > 0 && agentType !== 'generating_image' && (
         <div className="mb-3">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-caption text-muted-foreground">Progress</span>
@@ -93,16 +96,19 @@ const AgentActivityCard = ({
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden">
             <div
-              className={`h-full ${config?.bgColor?.replace('/10', '')} transition-all duration-300`}
-              style={{ width: `${progress}%` }}
+              className={`h-full rounded-full transition-all duration-500 ease-out`}
+              style={{
+                width: `${progress}%`,
+                background: `linear-gradient(90deg, ${config?.color?.replace('text-', '').includes('cyan') ? '#06b6d4' : config?.color?.replace('text-', '').includes('violet') ? '#8b5cf6' : config?.color?.replace('text-', '').includes('blue') ? '#3b82f6' : '#22c55e'}, transparent)`
+              }}
             />
           </div>
         </div>
       )}
 
-      {/* Expandable Details Section */}
-      {details?.length > 0 && isExpanded && (
-        <div className="mt-3 pt-3 border-t border-black/5 space-y-2 animate-in slide-in-from-top-2 duration-200">
+      {/* Expandable Thinking Process - Hidden in Shopping Mode to avoid duplicate logs */}
+      {details?.length > 0 && isExpanded && !isShopping && (
+        <div className="mt-3 pt-3 border-t border-white/5 space-y-2 animate-in slide-in-from-top-2 duration-200">
           <div className="text-xs font-semibold text-muted-foreground mb-2">Thinking Process:</div>
           {details?.map((detail, index) => (
             <div key={index} className="flex items-start gap-2 text-xs text-muted-foreground">
@@ -110,6 +116,68 @@ const AgentActivityCard = ({
               <span className="break-words">{detail}</span>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Live Logs Section */}
+      {logs?.length > 0 && (
+        <div className="mt-3 pt-3 border-t border-white/5">
+          <button
+            onClick={() => setShowLogs(!showLogs)}
+            className="w-full flex items-center justify-between text-xs text-gray-500 hover:text-gray-300 transition-colors mb-2"
+          >
+            <div className="flex items-center gap-1.5">
+              <Icon name="Terminal" size={12} />
+              <span className="font-semibold uppercase tracking-wider">Live Logs</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-neon-cyan/10 text-neon-cyan border border-neon-cyan/20">
+                {logs.length}
+              </span>
+            </div>
+            <Icon name={showLogs ? "ChevronUp" : "ChevronDown"} size={12} />
+          </button>
+
+          {showLogs && (
+            <div className="space-y-1 max-h-40 overflow-y-auto pr-1 scrollbar-thin animate-in slide-in-from-top-2 duration-200 bg-black/40 rounded-md p-2">
+              {logs.map((log, i) => {
+                const lConfig = logTypeConfig[log.type] || logTypeConfig.think;
+                return (
+                  <div key={i} className="flex items-start gap-1.5 text-[10px] font-mono">
+                    <span className="text-gray-600 shrink-0 w-14">{log.timestamp}</span>
+                    <Icon name={lConfig.icon} size={10} className={`${lConfig.color} shrink-0 mt-0.5`} />
+                    <span className="text-gray-400 break-words leading-tight">{log.message}</span>
+                  </div>
+                );
+              })}
+              <div ref={logsEndRef} />
+            </div>
+          )}
+        </div>
+      )}
+
+      {agentType === 'generating_image' && status === 'active' && (
+        <div className="mb-2 mt-4 flex flex-col items-center w-full">
+          {/* Animated Pixel Grid */}
+          <div className="pixel-loader-grid">
+            {Array.from({ length: 36 }).map((_, i) => {
+              // Create a random animation delay for each pixel to look like they fill in randomly
+              const randomDelay = Math.random() * 2;
+              return (
+                <div
+                  key={i}
+                  className="pixel"
+                  style={{ animationDelay: `${randomDelay}s` }}
+                />
+              );
+            })}
+          </div>
+
+          {/* Display Model Name */}
+          {modelName && (
+            <div className="mt-3 inline-flex items-center justify-center gap-1.5 px-3 py-1 rounded-full bg-black/40 border border-white/10">
+              <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold font-caption">GENERATING WITH:</span>
+              <span className="text-xs text-neon-cyan font-bold capitalize">{modelName}</span>
+            </div>
+          )}
         </div>
       )}
     </div>

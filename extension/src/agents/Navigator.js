@@ -1,3 +1,11 @@
+/**
+ * @file Navigator.js
+ * @description Core functionality for Navigator.
+ * Handles the primary logic and responsibilities designated for this module.
+ * 
+ * @context Autonomous Agent Logic (LLM execution boundary)
+ */
+
 import { FirewallService } from '../services/FirewallService';
 
 // Navigator Agent - Executes actions using Chrome Debugger Protocol
@@ -56,8 +64,52 @@ export class Navigator {
         }
 
         if (action.action === "WAIT") {
-            await new Promise(r => setTimeout(r, 1000)); // Reduced from 2000
+            await new Promise(r => setTimeout(r, 1000));
             return { done: false, result: "Waited 1s" };
+        }
+
+        // [NEW] CODE EDITOR TYPING
+        // Code editors (CodeMirror, Monaco, Ace) don't respond to normal TYPE.
+        // We use CDP Input.insertText after focusing the editor area.
+        if (action.action === "TYPE") {
+            const target = interactives.find(e => e.id === action.id);
+            if (target && target.attributes?.type === 'code-editor') {
+                console.log(`Navigator: Code Editor TYPE detected (${target.attributes.editorType})`);
+
+                // 1. Click the editor to focus it
+                const x = target.rect.x + (target.rect.w / 2);
+                const y = target.rect.y + (target.rect.h / 2);
+                await chrome.debugger.sendCommand({ tabId }, "Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", clickCount: 1 });
+                await new Promise(r => setTimeout(r, 50));
+                await chrome.debugger.sendCommand({ tabId }, "Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", clickCount: 1 });
+                await new Promise(r => setTimeout(r, 200));
+
+                // 2. Select All (Ctrl+A) to clear existing code
+                await chrome.debugger.sendCommand({ tabId }, "Input.dispatchKeyEvent", {
+                    type: "keyDown", windowsVirtualKeyCode: 65, code: "KeyA", key: "a",
+                    modifiers: 2 // Ctrl
+                });
+                await chrome.debugger.sendCommand({ tabId }, "Input.dispatchKeyEvent", {
+                    type: "keyUp", windowsVirtualKeyCode: 65, code: "KeyA", key: "a",
+                    modifiers: 2
+                });
+                await new Promise(r => setTimeout(r, 100));
+
+                // 3. Delete selected content
+                await chrome.debugger.sendCommand({ tabId }, "Input.dispatchKeyEvent", {
+                    type: "keyDown", windowsVirtualKeyCode: 8, nativeVirtualKeyCode: 8
+                });
+                await new Promise(r => setTimeout(r, 100));
+
+                // 4. Insert new code using CDP insertText (works with all editors)
+                const codeToType = String(action.value || "");
+                await chrome.debugger.sendCommand({ tabId }, "Input.insertText", {
+                    text: codeToType
+                });
+
+                await new Promise(r => setTimeout(r, 200));
+                return { done: false, result: `Typed code into ${target.attributes.editorType} editor` };
+            }
         }
 
         // Attach Debugger (Persistent check)
@@ -79,6 +131,41 @@ export class Navigator {
                 // Wait for scroll
                 await new Promise(r => setTimeout(r, 200)); // Reduced from 500
                 return { done: false, result: "Scrolled down" };
+            }
+            else if (action.action === "CLICK_COORD") {
+                // [NEW] Coordinate-based clicking using CDP for vision support
+                console.log(`Navigator: Executing CLICK_COORD at (${action.x}, ${action.y})`);
+
+                // Use Input.dispatchMouseEvent for coordinate clicking
+                // 1. Mouse Move
+                await chrome.debugger.sendCommand({ tabId }, "Input.dispatchMouseEvent", {
+                    type: "mouseMoved",
+                    x: action.x,
+                    y: action.y
+                });
+                await new Promise(r => setTimeout(r, 50));
+
+                // 2. Mouse Down
+                await chrome.debugger.sendCommand({ tabId }, "Input.dispatchMouseEvent", {
+                    type: "mousePressed",
+                    x: action.x,
+                    y: action.y,
+                    button: "left",
+                    clickCount: 1
+                });
+                await new Promise(r => setTimeout(r, 50));
+
+                // 3. Mouse Up
+                await chrome.debugger.sendCommand({ tabId }, "Input.dispatchMouseEvent", {
+                    type: "mouseReleased",
+                    x: action.x,
+                    y: action.y,
+                    button: "left",
+                    clickCount: 1
+                });
+
+                await new Promise(r => setTimeout(r, 200));
+                return { done: false, result: `Clicked at coordinates (${action.x}, ${action.y})` };
             }
             else {
                 // Actions requiring target (CLICK, TYPE)
@@ -255,11 +342,14 @@ export class Navigator {
                     await chrome.debugger.sendCommand({ tabId }, "Runtime.evaluate", { expression: jsFocus });
                     await new Promise(r => setTimeout(r, 100)); // wait for focus
 
-                    // [FIX] Clear Text Logic - Select All + Backspace twice just in case
-                    await chrome.debugger.sendCommand({ tabId }, "Runtime.evaluate", { expression: "document.activeElement ? document.activeElement.select() : null" });
-                    await new Promise(r => setTimeout(r, 50));
-                    await chrome.debugger.sendCommand({ tabId }, "Input.dispatchKeyEvent", { type: "keyDown", windowsVirtualKeyCode: 8, nativeVirtualKeyCode: 8 }); // Backspace
-                    await new Promise(r => setTimeout(r, 50));
+                    // [FIX] Smart Clear: Only clear if field already has content
+                    const currentVal = await chrome.debugger.sendCommand({ tabId }, "Runtime.evaluate", { expression: "document.activeElement ? document.activeElement.value : ''" });
+                    if (currentVal?.result?.value) {
+                        await chrome.debugger.sendCommand({ tabId }, "Runtime.evaluate", { expression: "document.activeElement ? document.activeElement.select() : null" });
+                        await new Promise(r => setTimeout(r, 30));
+                        await chrome.debugger.sendCommand({ tabId }, "Input.dispatchKeyEvent", { type: "keyDown", windowsVirtualKeyCode: 8, nativeVirtualKeyCode: 8 }); // Backspace
+                        await new Promise(r => setTimeout(r, 30));
+                    }
 
                     // [NEW] Hybrid Type: Send Keys + Force Value Update (React Hack)
                     // Some sites (Amazon/Google) ignore keystrokes if not perfect.
@@ -304,8 +394,11 @@ export class Navigator {
                     await chrome.debugger.sendCommand({ tabId }, "Runtime.evaluate", { expression: jsForceValue });
 
 
-                    // 4. Press Enter (Implicit submit)
-                    await chrome.debugger.sendCommand({ tabId }, "Input.dispatchKeyEvent", { type: "keyDown", windowsVirtualKeyCode: 13, nativeVirtualKeyCode: 13 });
+                    // 4. Press Enter ONLY if action explicitly requests it (search bars etc.)
+                    // For form fields, Enter would submit the form prematurely.
+                    if (action.submit) {
+                        await chrome.debugger.sendCommand({ tabId }, "Input.dispatchKeyEvent", { type: "keyDown", windowsVirtualKeyCode: 13, nativeVirtualKeyCode: 13 });
+                    }
                 }
             }
         } catch (error) {
